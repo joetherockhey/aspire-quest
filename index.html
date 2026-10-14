@@ -922,7 +922,7 @@ document.getElementById('lvlTable').innerHTML='<tr><th>Game level</th><th>HCS le
 document.getElementById('abilTable').innerHTML='<tr><th>Ability</th><th>Unlocked by</th><th>What it does</th></tr>'+ABIL.map(a=>`<tr><td>${a.i} <b>${a.n}</b></td><td>${CAP[a.cap].n} · Level ${a.l}</td><td class="small">${a.d}</td></tr>`).join('');
 document.getElementById('rankTable').innerHTML='<tr><th>Rank</th><th>XP</th><th>Breadth requirement</th></tr>'+RANKS.map((r,i)=>`<tr><td><b style="color:${r.c}">${i+1} · ${r.n}</b></td><td>${r.xp}</td><td>${r.rule||'Start here'}</td></tr>`).join('');
 </script>
-<script src="world.js"></script>
-<script src="campus.js"></script>
+<script src="world.js?v=6"></script>
+<script src="campus.js?v=6"></script>
 </body>
 </html>
