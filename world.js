@@ -399,6 +399,7 @@ const treeSprite = t => treeSprites[t.kind + (t.big ? 'b' : '')] ||= renderTree(
 /* ---------- characters (16x24 pixel sprites, generated) ---------- */
 const SKIN = ['#f6d2b0', '#e8b48c', '#c98d62', '#9c6a44', '#6e472c'];
 function renderChar(look, dir, frame) {
+  if (dir === 'r') { const l = renderChar(look, 'l', frame), f = canvas(16, 24), g = f.getContext('2d'); g.translate(16, 0); g.scale(-1, 1); g.drawImage(l, 0, 0); return f; } // right = mirrored left, drawn once
   const w = 16, h = 24, px = new Array(w * h).fill(null);
   const set = (x, y, c) => { if (x >= 0 && y >= 0 && x < w && y < h) px[y * w + x] = c; };
   const rect = (x0, y0, x1, y1, c) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) set(x, y, c); };
@@ -451,7 +452,6 @@ function renderChar(look, dir, frame) {
     if (n) o[y * w + x] = inkOf(P(n));
   }
   const cv = fromBuf(o, w, h);
-  if (dir === 'r') { const f = canvas(w, h), g = f.getContext('2d'); g.translate(w, 0); g.scale(-1, 1); g.drawImage(cv, 0, 0); return f; }
   return cv;
 }
 const SHIRTS = ['#e04848', '#3d7fe0', '#2fb36b', '#f2a93b', '#8b5cf6', '#ec4899', '#14b8a6', '#334155'];
