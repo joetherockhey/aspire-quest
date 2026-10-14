@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASPIRE Quest</title>
+<meta name="description" content="A gamified recognition and progression prototype for BCom ASPIRE, built on the Human Capability Standards. WORK3601 Team 1.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5fb; --panel:#ffffff; --panel2:#efedf7; --ink:#1b1830; --muted:#5f5b78; --line:#dcd8ea;
+  --accent:#5b3df5; --accent-ink:#fff; --good:#0f9d6b; --warn:#b26b00;
+  --head:#6d4cf5; --heart:#e0336b; --hands:#0b9488; --leap:#d97f06; --lead:#8a7a3a;
+  --shadow:0 1px 2px rgba(20,16,50,.06),0 6px 20px rgba(20,16,50,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f0d1c; --panel:#1a1730; --panel2:#231f3d; --ink:#eeeaff; --muted:#a49fc4; --line:#332e55;
+    --accent:#8f7bff; --accent-ink:#120f24; --good:#3ddc97; --warn:#ffb547;
+    --head:#9b84ff; --heart:#ff6b97; --hands:#2dd4bf; --leap:#fbbf24; --lead:#d9c37a;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f0d1c; --panel:#1a1730; --panel2:#231f3d; --ink:#eeeaff; --muted:#a49fc4; --line:#332e55;
+  --accent:#8f7bff; --accent-ink:#120f24; --good:#3ddc97; --warn:#ffb547;
+  --head:#9b84ff; --heart:#ff6b97; --hands:#2dd4bf; --leap:#fbbf24; --lead:#d9c37a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;overflow-x:hidden}
+h1,h2,h3,.disp{font-family:"Space Grotesk",Inter,sans-serif;letter-spacing:-.01em}
+h2{font-size:1.45rem;margin:0 0 .3rem}
+h3{font-size:1.05rem;margin:0 0 .4rem}
+p{margin:.3rem 0 .8rem}
+a{color:var(--accent)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+
+/* header */
+.top{background:var(--panel);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:40px;height:40px;border-radius:12px;background:conic-gradient(var(--head) 0 25%,var(--heart) 0 50%,var(--hands) 0 75%,var(--leap) 0);display:grid;place-items:center}
+.logo span{width:18px;height:18px;border-radius:50%;background:var(--panel)}
+.brand h1{font-size:1.3rem;margin:0}
+.brand .sub{font-size:.78rem;color:var(--muted)}
+.player{display:flex;align-items:center;gap:14px;flex:1;min-width:280px;max-width:560px}
+.rankgem{flex:none;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font:700 1.25rem "Space Grotesk";color:#fff;background:var(--rankc,#777);box-shadow:var(--shadow)}
+.pinfo{flex:1;min-width:0}
+.pinfo .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.pname{border:0;background:transparent;font:700 1rem "Space Grotesk";padding:0;width:100%;min-width:0}
+.pname:focus{outline:2px solid var(--accent);border-radius:4px}
+.bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;margin:4px 0}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--heart));border-radius:99px;transition:width .5s}
+.tools{display:flex;gap:8px}
+
+/* tabs */
+nav.tabs{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{border:0;background:none;padding:12px 12px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding:22px 0 40px}
+section[hidden]{display:none}
+.lede{max-width:760px}
+
+/* buttons */
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:10px;font-weight:600}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:5px 10px;font-size:.85rem}
+
+/* next-rank strip */
+.goal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:0 0 18px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;box-shadow:var(--shadow)}
+.goal b{font-family:"Space Grotesk"}
+.chk{display:inline-flex;gap:6px;align-items:center;font-size:.9rem}
+.chk::before{content:"○";color:var(--muted)}
+.chk.ok::before{content:"●";color:var(--good)}
+
+/* skill tree */
+.tree{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media (max-width:980px){.tree{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.tree{grid-template-columns:1fr}}
+.branch{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow);position:relative}
+.branch header{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.droot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:700 .8rem "Space Grotesk";color:#fff;background:var(--dc);flex:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--dc) 25%,transparent)}
+.branch h3{margin:0;color:var(--dc)}
+.branch .tag{font-size:.75rem;color:var(--muted)}
+.nodes{display:flex;flex-direction:column;gap:12px;position:relative;padding-left:22px}
+.nodes::before{content:"";position:absolute;left:21px;top:-12px;bottom:24px;width:3px;background:color-mix(in srgb,var(--dc) 35%,transparent);border-radius:3px}
+.node{position:relative;display:flex;gap:10px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:10px 10px 10px 30px;transition:transform .15s,border-color .15s}
+.node:hover{transform:translateX(3px);border-color:var(--dc)}
+.node::before{content:"";position:absolute;left:-7px;top:50%;width:20px;height:3px;background:color-mix(in srgb,var(--dc) 35%,transparent)}
+.orb{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;border:3px solid var(--dc);background:var(--panel)}
+.node.on .orb{background:var(--dc);box-shadow:0 0 10px var(--dc)}
+.node .nm{font-weight:600;line-height:1.25}
+.node .lv{font-size:.76rem;color:var(--muted)}
+.pips{display:flex;gap:3px;margin-top:4px}
+.pips i{width:16px;height:6px;border-radius:3px;background:var(--line)}
+.pips i.f{background:var(--dc)}
+.pips i.p{background:repeating-linear-gradient(45deg,var(--dc) 0 3px,transparent 3px 6px)}
+.node .nbody{flex:1;min-width:0}
+.node.locked{opacity:.55;filter:grayscale(.6)}
+.node .pend{font-size:.7rem;font-weight:700;color:var(--warn)}
+.lead{margin-top:18px}
+.lead .nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding-left:0}
+.lead .nodes::before{display:none}
+.lead .node{padding-left:30px}
+.lead .node::before{display:none}
+@media (max-width:980px){.lead .nodes{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.lead .nodes{grid-template-columns:1fr}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:14px 0 0;font-size:.82rem;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.card .meta{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.chip.c{color:var(--cc);border-color:color-mix(in srgb,var(--cc) 45%,transparent);background:color-mix(in srgb,var(--cc) 10%,transparent)}
+.xp{font:700 1.1rem "Space Grotesk";color:var(--accent)}
+.card .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:6px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.filters button{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 12px;font-size:.85rem;font-weight:600}
+.filters button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* badges */
+.badge{align-items:center;text-align:center}
+.medal{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:1.9rem;background:radial-gradient(circle at 35% 30%,#fff6,transparent 60%),var(--mc,var(--accent));box-shadow:0 0 0 5px color-mix(in srgb,var(--mc,var(--accent)) 25%,transparent)}
+.badge.off .medal{background:var(--panel2);box-shadow:0 0 0 5px var(--line);filter:grayscale(1);opacity:.6}
+.badge.off h3{color:var(--muted)}
+
+/* squad */
+.lb{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.lb .r{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.lb .r:first-child{border-top:0}
+.lb .r.me{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.lb .pos{font:700 1.05rem "Space Grotesk";color:var(--muted);text-align:center}
+.two{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.switch{display:flex;gap:10px;align-items:center;margin:10px 0}
+
+/* portfolio */
+.pf-entry{border-left:4px solid var(--cc);background:var(--panel);border-radius:0 12px 12px 0;padding:10px 14px;margin:0 0 10px;box-shadow:var(--shadow)}
+.pf-entry .h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px}
+.status{font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px}
+.status.v{background:color-mix(in srgb,var(--good) 15%,transparent);color:var(--good)}
+.status.p{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)}
+.profile{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px 18px;margin:8px 0 18px}
+.profile .pr{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:.88rem}
+.profile .bar{grid-column:1/-1;height:7px;margin:0}
+.profile .bar>i{background:var(--cc)}
+
+/* framework */
+.doc{max-width:900px}
+.doc h2{margin-top:28px}
+table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--panel);border-radius:12px;overflow:hidden}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);font-weight:600}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:8px 0 14px}
+.callout{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;padding:12px 16px;margin:12px 0}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:760px){.cols3{grid-template-columns:1fr}}
+
+/* dialog */
+dialog{border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--ink);padding:0;width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 40px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,8,25,.55)}
+.dlg{padding:20px}
+.dlg .x{float:right;border:0;background:var(--panel2);border-radius:8px;width:32px;height:32px;font-size:1.1rem}
+.ladder{list-style:none;padding:0;margin:12px 0}
+.ladder li{display:grid;grid-template-columns:30px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.ladder .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 .8rem "Space Grotesk";border:2px solid var(--dc);color:var(--dc)}
+.ladder li.done .n{background:var(--dc);color:#fff}
+.ladder li.cur{background:color-mix(in srgb,var(--dc) 8%,transparent);border-radius:8px}
+form.ev{display:flex;flex-direction:column;gap:8px;background:var(--panel2);padding:14px;border-radius:12px;margin:10px 0}
+form.ev label{font-weight:600;font-size:.88rem}
+form.ev textarea,form.ev input,form.ev select{width:100%;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px}
+form.ev textarea{min-height:110px;resize:vertical}
+.radios{display:flex;flex-direction:column;gap:6px}
+.radios label{display:flex;gap:8px;align-items:center;font-weight:500;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+
+/* toasts */
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:50;max-width:calc(100vw - 32px)}
+.toast{background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;font-weight:600;box-shadow:var(--shadow);animation:pop .35s ease-out}
+@keyframes pop{from{transform:translateY(12px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);font-size:.82rem}
+@media print{
+  .top,nav.tabs,footer,#toasts,.noprint{display:none!important}
+  section{display:none!important}
+  #portfolio{display:block!important}
+  body{background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"><span></span></div>
+      <div>
+        <h1>ASPIRE Quest</h1>
+        <div class="sub">Recognition &amp; Progression prototype · BCom ASPIRE · S1 2027 MVP</div>
+      </div>
+    </div>
+    <div class="player">
+      <div class="rankgem" id="rankGem">1</div>
+      <div class="pinfo">
+        <div class="row">
+          <input class="pname" id="pname" aria-label="Your name" maxlength="28">
+          <span class="small muted" id="rankName"></span>
+        </div>
+        <div class="bar" role="progressbar" aria-label="Progress to next rank"><i id="xpBar"></i></div>
+        <div class="row small muted"><span id="xpText"></span><span id="xpNext"></span></div>
+      </div>
+    </div>
+    <div class="tools noprint">
+      <button class="btn sm" id="sampleBtn" title="Load a sample student mid-way through first year">Demo student</button>
+      <button class="btn sm" id="resetBtn">Reset</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button role="tab" data-tab="tree" aria-selected="true">Skill tree</button>
+    <button role="tab" data-tab="quests">Quests</button>
+    <button role="tab" data-tab="badges">Badges</button>
+    <button role="tab" data-tab="squad">Squad</button>
+    <button role="tab" data-tab="portfolio">Portfolio</button>
+    <button role="tab" data-tab="how">How it works</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section id="tree">
+    <div class="goal" id="goal"></div>
+    <div class="tree" id="treeGrid"></div>
+    <div class="branch lead" id="leadBranch"></div>
+    <div class="legend">
+      <span><b>Levels:</b></span>
+      <span>1 Spark: took part</span><span>2 Reflect: wrote it up</span><span>3 Apply: endorsed artefact</span><span>4 Prove: verified by staff or an employer</span><span>5 Uplift: helped others grow</span>
+    </div>
+  </section>
+
+  <section id="quests" hidden>
+    <h2>Quest board</h2>
+    <p class="muted lede">Real ASPIRE activities. Checking in earns XP and sparks Level 1 in a capability you choose. Paid work, caring and volunteering count too, because life outside uni builds capability.</p>
+    <div class="filters" id="qFilters"></div>
+    <div class="grid" id="questGrid"></div>
+  </section>
+
+  <section id="badges" hidden>
+    <h2>Badges</h2>
+    <p class="muted lede">Each badge has a published rule, so nobody has to guess how to earn it. Badges recognise breadth, firsts and contribution, not just grinding.</p>
+    <div class="grid" id="badgeGrid"></div>
+  </section>
+
+  <section id="squad" hidden>
+    <div class="two">
+      <div>
+        <h2>Your squad</h2>
+        <p class="muted">Compare progress with friends you choose, not the whole cohort. Rankings stay small and friendly, so nobody is shown at the bottom of a 900-person table.</p>
+        <label class="switch"><input type="checkbox" id="optIn"> Show my progress to my squad</label>
+        <div class="lb" id="board"></div>
+      </div>
+      <div>
+        <h2>Cohort goal</h2>
+        <p class="muted">Everyone's XP adds to one shared target. When the cohort reaches it, the end-of-semester ASPIRE celebration unlocks. It's a shared goal for the whole cohort, not a competition.</p>
+        <div class="card">
+          <div class="row" style="display:flex;justify-content:space-between"><b class="disp">BCom cohort XP</b><span id="cohortTxt" class="muted small"></span></div>
+          <div class="bar" style="height:16px"><i id="cohortBar"></i></div>
+          <span class="small muted">Shared reward: end-of-semester ASPIRE celebration and showcase</span>
+        </div>
+        <h3 style="margin-top:18px">Squad quest</h3>
+        <div class="card">
+          <b>Go together</b>
+          <span class="small muted">Attend any quest with at least two squad members. In the full version this is confirmed when you all check in at the same event.</span>
+          <div class="foot"><span class="xp">+25 XP each</span><button class="btn sm" id="squadQuest">Simulate group check-in</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolio">
+    <h2>Employability Portfolio feed</h2>
+    <p class="muted lede">Every Reflect-level entry and above lands here automatically, tagged to a Human Capability Standard. Verified entries (Level 4+) become portable digital credentials. Print or save this page as PDF to take it into a careers appointment or an interview.</p>
+    <div class="noprint" style="margin:0 0 12px"><button class="btn sm" onclick="window.print()">Print / save as PDF</button></div>
+    <h3>Capability profile</h3>
+    <div class="profile" id="profile"></div>
+    <h3>Evidence</h3>
+    <div id="pfList"></div>
+  </section>
+
+  <section id="how" hidden>
+    <div class="doc">
+      <h2 style="margin-top:0">How the model works</h2>
+      <p class="lede">The brief asks the Recognition &amp; Progression working group to <em>"design the ASPIRE recognition framework, including points, badges, awards and/or other mechanisms that recognise participation and capability development. Define achievement criteria, progression thresholds, evidence requirements and how recognition connects to the Employability Portfolio."</em> The S1 2027 scope: <em>"a simple, transparent recognition model that can mature over time."</em></p>
+
+      <div class="callout"><b>The one-sentence version:</b> showing up earns you <b>XP</b>, which recognises participation; proving what you learned levels up a <b>capability</b> on a five-step evidence ladder, which recognises development; and every level from 2 up flows straight into your <b>Employability Portfolio</b>.</div>
+
+      <h2>1 · Two currencies, kept separate</h2>
+      <div class="cols3">
+        <div class="card"><h3>XP: participation</h3><span class="small">Earned by checking in to ASPIRE activities (QR or Canvas). Drives your rank and the cohort goal. Easy to earn, so it rewards showing up.</span></div>
+        <div class="card"><h3>Capability levels: development</h3><span class="small">Can't be bought with XP. Each level needs evidence. This stops the system from rewarding just turning up and keeps it credible to employers.</span></div>
+        <div class="card"><h3>Badges: milestones</h3><span class="small">Auto-awarded when published rules are met: breadth, firsts and helping others. They give you something to aim for and something to share.</span></div>
+      </div>
+
+      <h2>2 · The skill tree = Human Capability Standards</h2>
+      <p>The tree uses the <b>Human Capability Standards (HCS)</b>, an Australian framework of durable, transferable capabilities first released in 2012 and revalidated in 2025 against 21 international frameworks (Bowles &amp; Wilson, 2025). We use its <b>education variant (HCS25-E)</b>, which the authors recommend for student development, micro-credentials and badges.</p>
+      <div class="tscroll"><table>
+        <tr><th>Branch</th><th>Capabilities</th><th>Why it's here</th></tr>
+        <tr><td><b style="color:var(--head)">HEAD</b><br>Thinking</td><td>Critical Thinking · Creativity · Adaptive Mindset</td><td>Core HCS cognitive domain</td></tr>
+        <tr><td><b style="color:var(--heart)">HEART</b><br>Personal</td><td>Empathy · Ethics · Collaboration</td><td>Core HCS social-emotional domain</td></tr>
+        <tr><td><b style="color:var(--hands)">HANDS</b><br>Action</td><td>Communication · Problem Solving &amp; Data · Digital Acumen</td><td>Core HCS applied domain. Digital Acumen is the HCS25-E swap for Customer Focus</td></tr>
+        <tr><td><b style="color:var(--leap)">LEAP</b><br>Learn · Engage · Aspire · Progress</td><td>Self-Direction · Lifelong Learning · Cultural Awareness · Innovative Thinking</td><td>The HCS school-to-work capabilities, which the education variant brings back. It even has "Aspire" in the name.</td></tr>
+        <tr><td><b style="color:var(--lead)">LEAD</b><br>Prestige branch</td><td>Leadership · Engagement &amp; Coaching · Agile &amp; Innovative · Direction &amp; Purpose</td><td>HCS25-E leaves LEAD out for students, so we keep it as a <b>locked branch</b> that opens once you have strong foundations. This is how the model "matures over time".</td></tr>
+      </table></div>
+
+      <h2>3 · Achievement criteria and evidence requirements</h2>
+      <div class="tscroll"><table>
+        <tr><th>Level</th><th>Achievement criterion</th><th>Evidence required</th><th>Who confirms</th><th>Reward</th></tr>
+        <tr><td><b>1 Spark</b></td><td>Took part in an activity that builds this capability</td><td>Check-in to a tagged quest</td><td>Automatic</td><td>Quest XP</td></tr>
+        <tr><td><b>2 Reflect</b></td><td>Can explain what they did and learned</td><td>50+ word STAR reflection (Situation, Task, Action, Result)</td><td>Self (spot-checked)</td><td>+20 XP · portfolio entry (draft)</td></tr>
+        <tr><td><b>3 Apply</b></td><td>Used the capability to produce something real</td><td>Artefact (link or description) + endorsement</td><td>Peer, mentor or tutor</td><td>+40 XP · portfolio entry (endorsed)</td></tr>
+        <tr><td><b>4 Prove</b></td><td>Meets the HCS behavioural descriptor in a real setting</td><td>Verification against the HCS descriptor</td><td>Staff, employer or placement supervisor</td><td>+60 XP · digital credential</td></tr>
+        <tr><td><b>5 Uplift</b></td><td>Helps others build the capability</td><td>Evidence of mentoring, teaching or leading + verification</td><td>Staff or program lead</td><td>+100 XP · digital credential</td></tr>
+      </table></div>
+
+      <h2>4 · Progression thresholds (ranks)</h2>
+      <p>Ranks need XP <b>and</b> breadth, so you can't max one thing and coast.</p>
+      <div class="tscroll"><table id="rankTable"></table></div>
+
+      <h2>5 · Designed for the issues the Student Experience Survey (SES) measures</h2>
+      <div class="tscroll"><table>
+        <tr><th>SES theme</th><th>Design response</th></tr>
+        <tr><td>Belonging · connecting with other students</td><td>Squads, squad quests, a shared cohort goal, and a Welcome Week first quest</td></tr>
+        <tr><td>How work impacts study · commitments outside uni</td><td><b>Life Counts</b> quests: paid work, caring and volunteering are valid evidence. No streaks and no penalties for missed weeks, and progress carries over between semesters</td></tr>
+        <tr><td>Online vs in-person</td><td>Every quest is tagged online, in person or either, and online quests are worth the same XP</td></tr>
+        <tr><td>Support with AI</td><td>Digital Acumen + Ethics quests (responsible AI workshop)</td></tr>
+        <tr><td>Work-integrated learning (WIL) · placements</td><td>Placements carry the most XP, and supervisors can verify Level 4</td></tr>
+        <tr><td>Racism, gender and inclusion</td><td>Cultural Awareness capability, opt-in visibility, and small squad boards instead of a public cohort ranking</td></tr>
+        <tr><td>Intellectually stimulating</td><td>Case comps, hackathons and the LEAD prestige branch give high-achievers a stretch</td></tr>
+      </table></div>
+
+      <h2>6 · MVP (S1 2027) vs dream scenario</h2>
+      <div class="two">
+        <div class="card"><h3>MVP: use what already exists</h3>
+          <ul class="small" style="margin:0;padding-left:18px">
+            <li>Quest check-ins via QR codes and Canvas modules</li>
+            <li>XP, ranks and badges calculated from published rules (like this prototype)</li>
+            <li>Reflection and endorsement forms in Canvas, with staff verification at existing events</li>
+            <li>Portfolio feed as an exportable record</li>
+            <li>Core tree only (HEAD, HEART, HANDS, LEAP)</li>
+          </ul></div>
+        <div class="card"><h3>Dream: mature over time</h3>
+          <ul class="small" style="margin:0;padding-left:18px">
+            <li>LEAD prestige branch unlocked</li>
+            <li>Verified levels issued as Open Badges / verifiable credentials, shareable to LinkedIn</li>
+            <li>Employer-set quests and employers verifying Level 4 directly</li>
+            <li>Mobile app with squads, notifications and event check-in</li>
+            <li>Analytics that link participation to SES and graduate outcomes</li>
+          </ul></div>
+      </div>
+
+      <h2>7 · Questions for the strategy session</h2>
+      <ol>
+        <li>Where are we now? What gets recognised in ASPIRE today, and what goes unseen?</li>
+        <li>Which incentive would actually change what you do: XP, badges, squads, or portfolio credentials?</li>
+        <li>Is a 50-word reflection the right bar for Level 2? What would stop people gaming it?</li>
+        <li>Who should be able to verify Level 4, and how do we make that easy for employers?</li>
+        <li>How do we make sure students who work 20+ hours a week aren't left behind?</li>
+      </ol>
+      <p class="small muted">Source: Bowles, M. &amp; Wilson, P. T. (2025). <a href="https://marcbowles.com/wp-content/uploads/2025/07/Report_Revalidation-of-HUman-Capabilities-19-May-2025.pdf" target="_blank" rel="noopener">Revalidating the Human Capability Standards</a>. Capability descriptions in this prototype are our own plain-English summaries.</p>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">Student prototype by WORK3601 Team 1 for the BCom ASPIRE Recognition &amp; Progression brief. Not an official University system. Progress is saved only in this browser.</div></footer>
+
+<dialog id="dlg"><div class="dlg" id="dlgBody"></div></dialog>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+const DOMAINS = {
+  head:  {name:'HEAD',  sub:'Thinking', c:'--head'},
+  heart: {name:'HEART', sub:'Personal', c:'--heart'},
+  hands: {name:'HANDS', sub:'Action',   c:'--hands'},
+  leap:  {name:'LEAP',  sub:'Learn · Engage · Aspire · Progress', c:'--leap'},
+  lead:  {name:'LEAD',  sub:'Prestige branch · unlocks over time', c:'--lead'},
+};
+const CAPS = [
+  {id:'crit',  d:'head',  n:'Critical Thinking', desc:'Questions assumptions, weighs evidence and reaches sound, reasoned judgements.'},
+  {id:'crea',  d:'head',  n:'Creativity', desc:'Generates original ideas and fresh ways of framing a problem.'},
+  {id:'adapt', d:'head',  n:'Adaptive Mindset', desc:'Stays effective, curious and resilient when plans change or things go wrong.'},
+  {id:'emp',   d:'heart', n:'Empathy', desc:'Understands other people’s perspectives and feelings and responds with care.'},
+  {id:'eth',   d:'heart', n:'Ethics', desc:'Acts with integrity and weighs the impact of decisions, including how AI is used.'},
+  {id:'collab',d:'heart', n:'Collaboration', desc:'Works with others toward shared goals, builds trust and shares the load.'},
+  {id:'comm',  d:'hands', n:'Communication', desc:'Shares ideas clearly in writing, speech and visuals, and listens actively.'},
+  {id:'psd',   d:'hands', n:'Problem Solving & Data', desc:'Breaks problems down and uses data and evidence to find workable solutions.'},
+  {id:'dig',   d:'hands', n:'Digital Acumen', desc:'Uses digital tools and AI confidently, critically and safely to get work done.'},
+  {id:'self',  d:'leap',  n:'Self-Direction', desc:'Takes initiative, sets goals and follows through without being told.'},
+  {id:'life',  d:'leap',  n:'Lifelong Learning', desc:'Seeks out feedback and new learning, and reflects to keep growing.'},
+  {id:'cult',  d:'leap',  n:'Cultural Awareness', desc:'Respects and works effectively across cultures, backgrounds and identities.'},
+  {id:'innov', d:'leap',  n:'Innovative Thinking', desc:'Turns ideas into practical improvements that add real value.'},
+  {id:'lead',  d:'lead',  n:'Leadership', desc:'Sets direction and brings people with you.', req:{collab:3, comm:3}},
+  {id:'coach', d:'lead',  n:'Engagement & Coaching', desc:'Develops others and keeps teams motivated.', req:{emp:3, life:3}},
+  {id:'agile', d:'lead',  n:'Agile & Innovative', desc:'Leads change and experimentation in fast-moving settings.', req:{innov:3, adapt:3}},
+  {id:'purp',  d:'lead',  n:'Direction & Purpose', desc:'Connects work to a clear purpose and delivers results.', req:{self:3, eth:3}},
+];
+const CAP = Object.fromEntries(CAPS.map(c=>[c.id,c]));
+const CORE = ['head','heart','hands','leap'];
+const LEVELS = [
+  null,
+  {n:'Spark',   bonus:0,   who:'Automatic',               need:'Check in to a quest tagged with this capability.'},
+  {n:'Reflect', bonus:20,  who:'Self (spot-checked)',     need:'Write a 50+ word STAR reflection (Situation, Task, Action, Result).'},
+  {n:'Apply',   bonus:40,  who:'Peer, mentor or tutor',   need:'Share an artefact showing you applied it, endorsed by a peer, mentor or tutor.'},
+  {n:'Prove',   bonus:60,  who:'Staff, employer or supervisor', need:'Verified by staff, an employer or placement supervisor against the HCS descriptor.'},
+  {n:'Uplift',  bonus:100, who:'Staff or program lead',   need:'Show how you helped others build this capability, with verification.'},
+];
+const QUESTS = [
+  {id:'welcome',   n:'Welcome Week event',               xp:30,  s:'Welcome',     m:'In person', rep:false, t:['collab','cult','life']},
+  {id:'study',     n:'Study group / peer learning session', xp:15, s:'Belonging', m:'Either',    rep:true,  t:['collab','life']},
+  {id:'mentee',    n:'Mentoring catch-up (as mentee)',   xp:20,  s:'Mentoring',   m:'Either',    rep:true,  t:['life','self','comm']},
+  {id:'mentor',    n:'Peer mentor for a semester',       xp:100, s:'Mentoring',   m:'Either',    rep:false, t:['emp','comm','collab']},
+  {id:'leadws',    n:'Leadership workshop',              xp:40,  s:'Leadership',  m:'In person', rep:true,  t:['adapt','self','eth']},
+  {id:'club',      n:'Society or club committee role',   xp:60,  s:'Leadership',  m:'In person', rep:false, t:['collab','self','innov']},
+  {id:'openday',   n:'Open Day ambassador shift',        xp:60,  s:'Open Day',    m:'In person', rep:true,  t:['comm','emp','self']},
+  {id:'industry',  n:'Industry panel or employer event', xp:40,  s:'Employer engagement', m:'Either', rep:true, t:['comm','crit','cult']},
+  {id:'casecomp',  n:'Case competition',                 xp:80,  s:'Employer engagement', m:'Either', rep:true, t:['psd','crea','collab','crit']},
+  {id:'hack',      n:'Innovation sprint / hackathon',    xp:70,  s:'Employer engagement', m:'Either', rep:true, t:['innov','crea','dig']},
+  {id:'wil',       n:'Placement or internship (WIL)',    xp:150, s:'Employer engagement', m:'In person', rep:true, t:['psd','comm','adapt','dig']},
+  {id:'ai',        n:'Responsible AI skills workshop',   xp:30,  s:'Learning',    m:'Online',    rep:true,  t:['dig','eth','crit']},
+  {id:'job',       n:'Life Counts: part-time job reflection', xp:40, s:'Life Counts', m:'Online', rep:true, t:['comm','psd','emp','adapt','self']},
+  {id:'care',      n:'Life Counts: caring or volunteering', xp:40, s:'Life Counts', m:'Online',  rep:true,  t:['emp','eth','cult','adapt']},
+];
+const RANKS = [
+  {n:'Rookie',            c:'#8a8aa0', xp:0},
+  {n:'Explorer',          c:'#2f8fd8', xp:150,  rule:'3 capabilities at Level 1+',             ok:s=>count(1)>=3},
+  {n:'Bronze Builder',    c:'#b8733a', xp:400,  rule:'Level 2+ in every core branch',          ok:s=>CORE.every(d=>CAPS.some(c=>c.d===d&&lvl(c.id)>=2))},
+  {n:'Silver Achiever',   c:'#8e9bb0', xp:800,  rule:'4 capabilities at Level 3+, including one at Level 4', ok:s=>count(3)>=4&&count(4)>=1},
+  {n:'Gold ASPIRE Champion', c:'#d4a017', xp:1400, rule:'3 capabilities at Level 4+, and one at Level 5', ok:s=>count(4)>=3&&count(5)>=1},
+];
+const BADGES = [
+  {id:'first',  i:'🚀', n:'First Steps',   r:'Complete any quest',                         t:()=>S.log.length>0},
+  {id:'welcome',i:'👋', n:'Welcomed',      r:'Attend a Welcome Week event',                t:()=>!!S.q.welcome},
+  {id:'life',   i:'🧺', n:'Life Counts',   r:'Log paid work, caring or volunteering',      t:()=>!!(S.q.job||S.q.care)},
+  {id:'reflect',i:'📝', n:'Reflector',     r:'Reach Level 2 in any capability',            t:()=>count(2)>=1},
+  {id:'head',   i:'🧠', n:'Thinker',       r:'Every HEAD capability at Level 2+',          t:()=>dom('head',2)},
+  {id:'heart',  i:'💗', n:'Connector',     r:'Every HEART capability at Level 2+',         t:()=>dom('heart',2)},
+  {id:'hands',  i:'🛠️', n:'Doer',          r:'Every HANDS capability at Level 2+',         t:()=>dom('hands',2)},
+  {id:'leap',   i:'🐸', n:'Leaper',        r:'Every LEAP capability at Level 2+',          t:()=>dom('leap',2)},
+  {id:'amb',    i:'🎓', n:'Ambassador',    r:'Do an Open Day ambassador shift',            t:()=>!!S.q.openday},
+  {id:'mentor', i:'🤝', n:'Mentor',        r:'Be a peer mentor for a semester',            t:()=>!!S.q.mentor},
+  {id:'squad',  i:'👥', n:'Squad Goals',   r:'Complete a squad quest',                     t:()=>S.squad>0},
+  {id:'wide',   i:'🌈', n:'Well-Rounded',  r:'10 capabilities at Level 2+',                t:()=>count(2)>=10},
+  {id:'proof',  i:'✅', n:'Verified',      r:'First Level 4 (verified) capability',        t:()=>count(4)>=1},
+  {id:'uplift', i:'🌱', n:'Trailblazer',   r:'First Level 5 (helped others grow)',         t:()=>count(5)>=1},
+  {id:'lead',   i:'👑', n:'Prestige',      r:'Unlock a LEAD branch capability',            t:()=>CAPS.some(c=>c.d==='lead'&&unlocked(c))},
+  {id:'gold',   i:'🏆', n:'Champion',      r:'Reach Gold ASPIRE Champion rank',            t:()=>rank()===4},
+];
+const SQUAD = [['Aisha',1120],['Mei',890],['Priya',640],['Maria',520],['Tom',410],['Liam',230]];
+const COHORT = {base:12400, goal:20000};
+
+/* ---------- state ---------- */
+const KEY='aspire-quest-v1';
+const fresh = ()=>({name:'Your name', xp:0, caps:{}, q:{}, log:[], squad:0, optIn:true});
+let S = fresh();
+try{ const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(fresh(),JSON.parse(raw)); }catch(e){}
+const save=()=>{ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} };
+
+const ents = id => S.caps[id]||(S.caps[id]=[]);
+function lvl(id){ let l=0; for(let n=1;n<=5;n++){ if(ents(id).some(e=>e.level===n&&e.st==='v')) l=n; else break; } return l; }
+const pending = id => ents(id).find(e=>e.st==='p');
+const count = n => CAPS.filter(c=>lvl(c.id)>=n).length;
+const dom = (d,n) => CAPS.filter(c=>c.d===d).every(c=>lvl(c.id)>=n);
+const unlocked = c => !c.req || Object.entries(c.req).every(([k,v])=>lvl(k)>=v);
+function rank(){ let r=0; for(let i=1;i<RANKS.length;i++){ if(S.xp>=RANKS[i].xp && RANKS[i].ok()) r=i; else break; } return r; }
+const today = ()=>new Date().toISOString().slice(0,10);
+const esc = s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const words = s=>(s.trim().match(/\S+/g)||[]).length;
+const cv = d=>`var(${DOMAINS[d].c})`;
+
+/* every state change goes through commit so toasts can diff before/after */
+function snap(){ return {r:rank(), b:BADGES.filter(b=>b.t()).map(b=>b.id), l:Object.fromEntries(CAPS.map(c=>[c.id,lvl(c.id)]))}; }
+function commit(fn){
+  const a=snap(); fn(); save(); render(); const b=snap();
+  CAPS.forEach(c=>{ if(b.l[c.id]>a.l[c.id]) toast(`⬆️ ${c.n} reached Level ${b.l[c.id]}: ${LEVELS[b.l[c.id]].n}`); });
+  b.b.filter(x=>!a.b.includes(x)).forEach(id=>{ const bd=BADGES.find(x=>x.id===id); toast(`${bd.i} Badge unlocked: ${bd.n}`); });
+  if(b.r>a.r) toast(`🎉 Rank up! You're now ${RANKS[b.r].n}`);
+}
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $('#toasts').append(t); while($('#toasts').children.length>3) $('#toasts').firstChild.remove(); setTimeout(()=>t.remove(),4200); }
+const $ = s=>document.querySelector(s);
+
+/* ---------- render ---------- */
+function render(){
+  const r=rank(), nx=RANKS[r+1];
+  $('#pname').value=S.name;
+  $('#rankGem').textContent=r+1; $('#rankGem').style.setProperty('--rankc',RANKS[r].c);
+  $('#rankName').textContent=RANKS[r].n;
+  $('#xpText').textContent=`${S.xp} XP`;
+  if(nx){
+    const lo=RANKS[r].xp, pct=Math.min(100,(S.xp-lo)/(nx.xp-lo)*100);
+    $('#xpBar').style.width=pct+'%'; $('#xpNext').textContent=`Next: ${nx.n}`;
+    $('#goal').innerHTML=`<b>Next rank · ${nx.n}</b><span class="chk ${S.xp>=nx.xp?'ok':''}">${S.xp} / ${nx.xp} XP</span><span class="chk ${nx.ok()?'ok':''}">${nx.rule}</span>`;
+  } else {
+    $('#xpBar').style.width='100%'; $('#xpNext').textContent='Max rank';
+    $('#goal').innerHTML=`<b>🏆 Gold ASPIRE Champion</b><span class="muted">You've maxed the S1 2027 ranks. The LEAD branch is your next frontier.</span>`;
+  }
+  renderTree(); renderQuests(); renderBadges(); renderSquad(); renderPortfolio();
+}
+function nodeHTML(c){
+  const l=lvl(c.id), p=pending(c.id), lock=!unlocked(c);
+  const pips=[1,2,3,4,5].map(n=>`<i class="${n<=l?'f':(p&&p.level===n?'p':'')}"></i>`).join('');
+  const sub = lock ? '🔒 Needs '+Object.entries(c.req).map(([k,v])=>`${CAP[k].n} L${v}`).join(' + ')
+            : l? `Level ${l} · ${LEVELS[l].n}` : 'Not started';
+  return `<button class="node ${l?'on':''} ${lock?'locked':''}" data-cap="${c.id}" style="--dc:${cv(c.d)}">
+    <span class="orb"></span><span class="nbody"><div class="nm">${c.n}</div><div class="lv">${sub}</div>
+    <div class="pips">${pips}</div>${p?'<div class="pend">⏳ awaiting endorsement</div>':''}</span></button>`;
+}
+function renderTree(){
+  $('#treeGrid').innerHTML = CORE.map(d=>{
+    const D=DOMAINS[d], cs=CAPS.filter(c=>c.d===d), pts=cs.reduce((a,c)=>a+lvl(c.id),0);
+    return `<div class="branch" style="--dc:${cv(d)}"><header><div class="droot">${pts}/${cs.length*5}</div>
+      <div><h3>${D.name}</h3><div class="tag">${D.sub}</div></div></header>
+      <div class="nodes">${cs.map(nodeHTML).join('')}</div></div>`;
+  }).join('');
+  const L=DOMAINS.lead;
+  $('#leadBranch').style.setProperty('--dc',cv('lead'));
+  $('#leadBranch').innerHTML = `<header><div class="droot">👑</div><div><h3>${L.name}</h3><div class="tag">${L.sub}. Each capability opens when its foundations reach Level 3.</div></div></header>
+    <div class="nodes">${CAPS.filter(c=>c.d==='lead').map(nodeHTML).join('')}</div>`;
+}
+let qFilter='All';
+function renderQuests(){
+  const streams=['All',...new Set(QUESTS.map(q=>q.s))];
+  $('#qFilters').innerHTML=streams.map(s=>`<button data-qf="${s}" aria-pressed="${s===qFilter}">${s}</button>`).join('');
+  $('#questGrid').innerHTML=QUESTS.filter(q=>qFilter==='All'||q.s===qFilter).map(q=>{
+    const done=S.q[q.id]||0, off=!q.rep&&done;
+    return `<div class="card"><div class="meta"><span class="chip">${q.s}</span><span class="chip">${q.m}</span>${q.rep?'<span class="chip">Repeatable</span>':''}</div>
+      <h3>${q.n}</h3><div class="meta">${q.t.map(t=>`<span class="chip c" style="--cc:${cv(CAP[t].d)}">${CAP[t].n}</span>`).join('')}</div>
+      <div class="foot"><span class="xp">+${q.xp} XP</span><span>${done?`<span class="small muted">done ×${done}</span> `:''}<button class="btn sm primary" data-quest="${q.id}" ${off?'disabled':''}>${off?'Completed':'Check in'}</button></span></div></div>`;
+  }).join('');
+}
+function renderBadges(){
+  $('#badgeGrid').innerHTML=BADGES.map(b=>{ const on=b.t();
+    return `<div class="card badge ${on?'':'off'}"><div class="medal" aria-hidden="true">${b.i}</div><h3>${b.n}</h3><span class="small muted">${b.r}</span>${on?'<span class="status v">Earned</span>':''}</div>`;}).join('');
+}
+function renderSquad(){
+  $('#optIn').checked=S.optIn;
+  const rows=[...SQUAD.map(([n,x])=>({n,x})),{n:S.optIn?S.name+' (you)':'You (hidden from squad)',x:S.xp,me:true}].sort((a,b)=>b.x-a.x);
+  $('#board').innerHTML=rows.map((r,i)=>`<div class="r ${r.me?'me':''}"><span class="pos">${i+1}</span><span><b>${esc(r.n)}</b><br><span class="small muted">${RANKS[rankFor(r.x)].n}</span></span><span class="xp">${r.x} XP</span></div>`).join('');
+  const tot=COHORT.base+S.xp+SQUAD.reduce((a,[,x])=>a+x,0);
+  $('#cohortTxt').textContent=`${tot.toLocaleString()} / ${COHORT.goal.toLocaleString()}`;
+  $('#cohortBar').style.width=Math.min(100,tot/COHORT.goal*100)+'%';
+}
+const rankFor = x=>{ let r=0; RANKS.forEach((k,i)=>{ if(x>=k.xp) r=i; }); return r; }; // friends: XP-only estimate
+function renderPortfolio(){
+  $('#profile').innerHTML=CAPS.filter(c=>c.d!=='lead'||unlocked(c)).map(c=>{ const l=lvl(c.id);
+    return `<div class="pr" style="--cc:${cv(c.d)}"><span>${c.n}</span><span class="muted">L${l}${l?' '+LEVELS[l].n:''}</span><div class="bar"><i style="width:${l*20}%"></i></div></div>`;}).join('');
+  const list=CAPS.flatMap(c=>ents(c.id).filter(e=>e.level>=2).map(e=>({c,e}))).sort((a,b)=>b.e.date.localeCompare(a.e.date)||b.e.level-a.e.level);
+  $('#pfList').innerHTML=list.length?list.map(({c,e})=>`<div class="pf-entry" style="--cc:${cv(c.d)}"><div class="h"><b>${c.n} · Level ${e.level} ${LEVELS[e.level].n}</b>
+    <span><span class="small muted">${e.date}</span> <span class="status ${e.st}">${e.st==='v'?(e.level>=4?'Verified credential':'Recorded'):'Pending'}</span></span></div>
+    <div class="small">${esc(e.text)}</div>${e.by?`<div class="small muted">${e.level>=4?'Verified':'Endorsed'} by ${esc(e.by)}</div>`:''}</div>`).join('')
+    :'<p class="muted">Nothing yet. Reach Level 2 (Reflect) in any capability and it appears here.</p>';
+}
+
+/* ---------- dialogs ---------- */
+function openCap(id){
+  const c=CAP[id], l=lvl(id), p=pending(id), lock=!unlocked(c), next=l+1;
+  let action='';
+  if(lock){
+    action=`<div class="callout">🔒 <b>Prestige capability.</b> Unlocks when ${Object.entries(c.req).map(([k,v])=>`${CAP[k].n} reaches Level ${v} (now ${lvl(k)})`).join(' and ')}.</div>`;
+  } else if(p){
+    action=`<div class="callout">⏳ <b>Level ${p.level} submitted</b>, awaiting ${LEVELS[p.level].who.toLowerCase()}.<br><span class="small muted">"${esc(p.text)}"${p.by?` · requested from ${esc(p.by)}`:''}</span>
+      <div style="margin-top:8px"><button class="btn sm primary" data-approve="${id}">Simulate approval</button> <span class="small muted">(in the real system the endorser gets a link)</span></div></div>`;
+  } else if(next===1){
+    const qs=QUESTS.filter(q=>q.t.includes(id));
+    action=`<h3>Spark it: do one of these quests</h3>`+(qs.length?`<div class="radios">${qs.map(q=>`<button class="btn sm" data-quest="${q.id}" data-pre="${id}" ${!q.rep&&S.q[q.id]?'disabled':''}>${q.n} · +${q.xp} XP</button>`).join('')}</div>`
+      :`<p class="small muted">No quest tags this yet, so record a real experience instead.</p><button class="btn sm primary" data-spark="${id}">Log a real-world experience</button>`);
+  } else if(next<=5){
+    const f={
+      2:`<label for="t">STAR reflection (50+ words)</label><textarea id="t" required placeholder="Situation: … Task: … Action: … Result: … What I learned about ${c.n.toLowerCase()}: …"></textarea><span class="small muted" id="wc">0 words</span>`,
+      3:`<label for="t">Artefact: what did you produce? (link or description)</label><textarea id="t" required placeholder="e.g. Our case comp deck (link). I built the financial model and…"></textarea>
+         <label for="by">Endorser name</label><input id="by" required placeholder="e.g. Maria Chen"><label for="role">Endorser role</label><select id="role"><option>Peer</option><option>Mentor</option><option>Tutor</option></select>`,
+      4:`<label for="t">Context: where did you show this capability?</label><textarea id="t" required placeholder="e.g. During my internship at… I…"></textarea>
+         <label for="by">Verifier name</label><input id="by" required><label for="role">Verifier role</label><select id="role"><option>ASPIRE staff</option><option>Employer</option><option>Placement supervisor</option></select>`,
+      5:`<label for="t">Who did you help build this capability, and how?</label><textarea id="t" required placeholder="e.g. Ran a peer workshop for 12 first-years on…"></textarea>
+         <label for="by">Verifier name</label><input id="by" required><label for="role">Verifier role</label><select id="role"><option>ASPIRE staff</option><option>Program lead</option></select>`,
+    }[next];
+    action=`<form class="ev" data-level="${next}" data-cap="${id}"><b>Unlock Level ${next} · ${LEVELS[next].n}</b><span class="small muted">${LEVELS[next].need}</span>${f}
+      <button class="btn primary" type="submit">${next===2?'Save reflection':'Submit for '+(next===3?'endorsement':'verification')}</button></form>`;
+  } else action=`<div class="callout">🌟 Maxed. You're helping others grow this capability.</div>`;
+
+  const ladder=LEVELS.slice(1).map((L,i)=>{const n=i+1; return `<li class="${n<=l?'done':''} ${n===next&&!lock?'cur':''}"><span class="n">${n<=l?'✓':n}</span><span><b>${L.n}</b> <span class="small muted">· ${L.who}${L.bonus?` · +${L.bonus} XP`:''}</span><br><span class="small">${L.need}</span></span></li>`;}).join('');
+  const hist=ents(id).filter(e=>e.st==='v').map(e=>`<li class="small">L${e.level} · ${e.date} · ${esc(e.text.slice(0,90))}${e.text.length>90?'…':''}</li>`).join('');
+  show(`<div style="--dc:${cv(c.d)}"><button class="x" data-close aria-label="Close">×</button>
+    <span class="chip c" style="--cc:${cv(c.d)}">${DOMAINS[c.d].name} · ${DOMAINS[c.d].sub}</span>
+    <h2 style="margin-top:8px">${c.n}</h2><p>${c.desc}</p>
+    <ol class="ladder">${ladder}</ol>${action}${hist?`<h3>Evidence log</h3><ul style="padding-left:18px;margin:0">${hist}</ul>`:''}</div>`);
+  const t=$('#dlgBody textarea');
+  if(t&&next===2) t.addEventListener('input',()=>{$('#wc').textContent=words(t.value)+' words';});
+}
+function openQuest(qid,pre){
+  const q=QUESTS.find(x=>x.id===qid);
+  show(`<button class="x" data-close aria-label="Close">×</button><span class="chip">${q.s} · ${q.m}</span><h2 style="margin-top:8px">${q.n}</h2>
+    <p class="muted">Check in (in the real system: scan the event QR or complete the Canvas module). Pick the capability you mainly practised. It gets Level 1 if it hasn't started yet.</p>
+    <form class="ev" data-questform="${qid}"><div class="radios">${q.t.map((t,i)=>`<label><input type="radio" name="cap" value="${t}" ${(pre?t===pre:i===0)?'checked':''}> <span class="chip c" style="--cc:${cv(CAP[t].d)}">${DOMAINS[CAP[t].d].name}</span> ${CAP[t].n} <span class="small muted">· L${lvl(t)}</span></label>`).join('')}</div>
+    <button class="btn primary" type="submit">Check in · +${q.xp} XP</button></form>`);
+}
+const dlg=$('#dlg');
+function show(html){ $('#dlgBody').innerHTML=html; if(!dlg.open) dlg.showModal(); }
+
+/* ---------- actions ---------- */
+function doQuest(qid,cap){
+  const q=QUESTS.find(x=>x.id===qid);
+  S.xp+=q.xp; S.q[qid]=(S.q[qid]||0)+1; S.log.push({date:today(),q:qid,cap,xp:q.xp});
+  if(lvl(cap)===0&&!pending(cap)) ents(cap).push({level:1,st:'v',date:today(),text:'Took part: '+q.n});
+}
+function approve(id){ const p=pending(id); if(!p) return; p.st='v'; S.xp+=LEVELS[p.level].bonus; }
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-cap],[data-quest],[data-approve],[data-close],[data-qf],[data-tab],[data-spark]');
+  if(!el) return;
+  if(el.dataset.tab){ selectTab(el.dataset.tab); return; }
+  if(el.dataset.qf){ qFilter=el.dataset.qf; renderQuests(); return; }
+  if('close' in el.dataset){ dlg.close(); return; }
+  if(el.dataset.quest){ openQuest(el.dataset.quest, el.dataset.pre); return; }
+  if(el.dataset.approve){ const id=el.dataset.approve; commit(()=>approve(id)); openCap(id); return; }
+  if(el.dataset.spark){ const id=el.dataset.spark; commit(()=>{ents(id).push({level:1,st:'v',date:today(),text:'Real-world experience'});}); openCap(id); return; }
+  if(el.matches('.node')) openCap(el.dataset.cap);
+});
+document.addEventListener('submit',e=>{
+  const f=e.target; e.preventDefault();
+  if(f.dataset.questform){
+    const cap=f.querySelector('input[name=cap]:checked').value, qid=f.dataset.questform;
+    commit(()=>doQuest(qid,cap)); dlg.close(); return;
+  }
+  const n=+f.dataset.level, id=f.dataset.cap, text=f.querySelector('#t').value.trim();
+  if(n===2&&words(text)<50){ toast(`Reflection needs 50+ words (you have ${words(text)})`); return; }
+  const by=f.querySelector('#by'), role=f.querySelector('#role');
+  commit(()=>{
+    ents(id).push({level:n, st:n===2?'v':'p', date:today(), text, by:by?`${by.value.trim()} (${role.value})`:''});
+    if(n===2) S.xp+=LEVELS[2].bonus;
+  });
+  openCap(id);
+});
+dlg.addEventListener('click',e=>{ if(e.target===dlg) dlg.close(); });
+
+function selectTab(id){
+  document.querySelectorAll('nav.tabs [data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));
+  document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!==id);
+  try{ localStorage.setItem(KEY+'-tab',id); }catch(e){}
+}
+$('#pname').addEventListener('change',e=>{ S.name=e.target.value.trim()||'Player'; save(); render(); });
+$('#optIn').addEventListener('change',e=>{ S.optIn=e.target.checked; save(); renderSquad(); });
+$('#squadQuest').addEventListener('click',()=>commit(()=>{ S.squad++; S.xp+=25; S.log.push({date:today(),q:'squad',xp:25}); }));
+$('#resetBtn').addEventListener('click',()=>{ if(confirm('Reset all progress in this browser?')){ S=fresh(); save(); render(); toast('Progress reset'); }});
+$('#sampleBtn').addEventListener('click',()=>{
+  // Sam: first-year, works part-time, mid-way through S1
+  S=fresh(); S.name='Sam (demo)';
+  const plan={welcome:'collab',study:'life',mentee:'self',openday:'comm',job:'adapt',industry:'crit',casecomp:'psd',ai:'dig',care:'emp',hack:'crea',club:'innov'};
+  Object.entries(plan).forEach(([q,c])=>doQuest(q,c));
+  doQuest('industry','cult'); doQuest('leadws','eth');
+  const R='Situation: our case competition team had two days to analyse a retailer losing market share. Task: I owned the customer data. Action: I cleaned the survey data, built pivot tables, and challenged our first assumption when the numbers did not support it. Result: we pivoted to a loyalty strategy and placed second. I learned to let evidence lead the argument.';
+  ['collab','life','comm','psd','crit','adapt','emp','dig','self'].forEach(c=>{ ents(c).push({level:2,st:'v',date:'2027-04-02',text:R}); S.xp+=20; });
+  ents('psd').push({level:3,st:'v',date:'2027-04-20',text:'Case competition financial model and data appendix',by:'Maria Chen (Mentor)'}); S.xp+=40;
+  ents('comm').push({level:3,st:'v',date:'2027-04-22',text:'Open Day talk to 40 prospective students and their parents',by:'Priya N. (Peer)'}); S.xp+=40;
+  ents('comm').push({level:4,st:'p',date:'2027-05-01',text:'Weekly client updates during part-time role at a café group',by:'J. Lee (Employer)'});
+  save(); render(); toast('Loaded demo student: Sam'); selectTab('tree');
+});
+
+render();
+let startTab='tree'; try{ startTab=localStorage.getItem(KEY+'-tab')||'tree'; }catch(e){}
+selectTab(startTab);
+document.getElementById('rankTable').innerHTML='<tr><th>Rank</th><th>XP</th><th>Breadth requirement</th></tr>'+RANKS.map((r,i)=>`<tr><td><b style="color:${r.c}">${i+1} · ${r.n}</b></td><td>${r.xp}</td><td>${r.rule||'Start here'}</td></tr>`).join('');
+</script>
+</body>
+</html>
