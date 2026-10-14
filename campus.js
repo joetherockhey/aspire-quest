@@ -444,6 +444,8 @@ requestAnimationFrame(loop);
 
 return {
   pos: () => [me.x, me.y, me.bike],
+  npcs: () => NPCS.map(n => [n.id, n.x, n.y]),
+  tp: (x, y, d) => { teleport(x, y); if (d) me.dir = d; },
   sync() { send({ t: 'me', ...myInfo() }); renderAbil(); if (!can('map')) miniCv.hidden = true; },
   shown() { resize(); if (!S.joined) setup(); stage.focus(); },
   nearby() { const r = can('teamspirit') ? 8 : 3; return [...others.values()].filter(p => Math.hypot(p.px - me.x, p.py - me.y) <= r).map(p => p.name); },

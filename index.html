@@ -227,6 +227,11 @@ form.ev textarea{min-height:110px;resize:vertical}
 .chip{white-space:nowrap;display:inline-block}
 .meta{gap:5px}
 @media (max-width:640px){.hud .hide-sm{display:none}nav.tabs .wrap{mask-image:linear-gradient(90deg,#000 85%,transparent)}}
+.radios label{cursor:pointer;gap:10px}
+form.ev .radios input{width:auto;flex:none;margin:0;accent-color:var(--accent)}
+.radios label:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.radios .rname{font-weight:600}
+.radios .rlvl{margin-left:auto;white-space:nowrap}
 /* campus */
 .stage canvas#map{image-rendering:pixelated}
 .zoombar{position:absolute;top:10px;right:10px;display:flex;gap:4px;align-items:center;background:rgba(20,16,40,.7);padding:4px;border-radius:10px;color:#fff;font:600 .85rem "Pixelify Sans",monospace}
@@ -827,7 +832,7 @@ function openQuest(qid,pre){
   const q=QUESTS.find(x=>x.id===qid);
   show(`<button class="x" data-close aria-label="Close">×</button><span class="chip">${q.s} · ${q.m}</span><h2 style="margin-top:8px">${q.n}</h2>
     <p class="muted">Check in (in the real system: scan the event QR or complete the Canvas module). Pick the capability you mainly practised. It gets Level 1 if it hasn't started yet.</p>
-    <form class="ev" data-questform="${qid}"><div class="radios">${q.t.map((t,i)=>`<label><input type="radio" name="cap" value="${t}" ${(pre?t===pre:i===0)?'checked':''}> <span class="chip c" style="--cc:${cv(CAP[t].d)}">${DOMAINS[CAP[t].d].name}</span> ${CAP[t].n} <span class="small muted">· L${lvl(t)}</span></label>`).join('')}</div>
+    <form class="ev" data-questform="${qid}"><div class="radios">${q.t.map((t,i)=>`<label><input type="radio" name="cap" value="${t}" ${(pre?t===pre:i===0)?'checked':''}><span class="rname">${CAP[t].n}</span><span class="chip c" style="--cc:${cv(CAP[t].d)}">${DOMAINS[CAP[t].d].name}</span><span class="rlvl small muted">${lvl(t)?`Level ${lvl(t)}`:'Not started'}</span></label>`).join('')}</div>
     <button class="btn primary" type="submit">Check in · +${q.xp} XP</button></form>`);
 }
 const dlg=$('#dlg');

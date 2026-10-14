@@ -194,6 +194,10 @@ async function load(url) {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (treeAt[k + dy * W + dx]) return;
     treeAt[k] = 1; trees.push({ tx, ty, kind: kind === 2 ? 3 : kind === 1 ? 2 : (hash(i, 5) < .3 ? 1 : 0), big: hash(i, 9) < .35 });
   });
+  // archways: OSM footpaths that run through the Quadrangle's wings become open passages
+  const arch = new Set(blds.filter(b => b.name === 'The Quadrangle').map(b => b.id));
+  for (const l of lines) if (WALK_LINES.has(l.k)) stroke(l.p, .55, s, ox, oy, W, H, i => { if (arch.has(bid[i])) { bid[i] = -1; mat[i] = M.PLAZA; } });
+  for (const b of blds) b.tiles = b.tiles.filter(i => bid[i] === b.id);
   labelsRaw = raw.labels.map(([t, x, y]) => [t, x * s - ox, y * s - oy]);
   for (const [k, [x, y]] of Object.entries(raw.anchors)) anchorsM[k] = [x * s - ox, y * s - oy];
   blds.forEach(prepBuilding);
