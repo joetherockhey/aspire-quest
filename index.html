@@ -7,7 +7,7 @@
 <meta name="description" content="A gamified recognition and progression prototype for BCom ASPIRE, built on the Human Capability Standards. WORK3601 Team 1.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f6f5fb; --panel:#ffffff; --panel2:#efedf7; --ink:#1b1830; --muted:#5f5b78; --line:#dcd8ea;
@@ -85,7 +85,7 @@ main{padding:22px 0 40px}
 .chk.ok::before{content:"●";color:var(--good)}
 
 /* skill tree */
-.tree{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.tree{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media (max-width:980px){.tree{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:560px){.tree{grid-template-columns:1fr}}
 .branch{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow);position:relative}
@@ -192,7 +192,43 @@ form.ev textarea{min-height:110px;resize:vertical}
 @keyframes pop{from{transform:translateY(12px);opacity:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
+.abs{display:flex;gap:2px;margin-top:4px;flex-wrap:wrap}
+.ab{font-size:.85rem;filter:grayscale(1);opacity:.35}
+.ab.on{filter:none;opacity:1}
+.hcsdef{font-size:.92rem;background:var(--panel2);border-radius:10px;padding:8px 12px}
+.hcsgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.hcsgrid{grid-template-columns:1fr}}
+.chip.got{background:var(--cc);color:#fff}
+.ablist{display:flex;flex-direction:column;gap:6px}
+.abrow{display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:center;padding:6px 8px;border-radius:10px;background:var(--panel2);opacity:.55}
+.abrow.on{opacity:1}
+.abrow .ab{font-size:1.3rem}
+.abilbar{display:flex;gap:3px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;margin:0 0 8px;padding-bottom:2px}
+.abilbar .ab{font-size:1.15rem;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:2px 4px;cursor:help}
 /* campus */
+.stage canvas#map{image-rendering:pixelated}
+.zoombar{position:absolute;top:10px;right:10px;display:flex;gap:4px;align-items:center;background:rgba(20,16,40,.7);padding:4px;border-radius:10px;color:#fff;font:600 .85rem "Pixelify Sans",monospace}
+.zoombar .btn{background:#fffdf5;color:#1b1830;border-color:#1b1830;min-width:30px}
+#zoomTxt{min-width:30px;text-align:center}
+#mini{position:absolute;top:52px;right:10px;width:min(230px,42%);height:auto;border:3px solid #1b1830;border-radius:8px;image-rendering:pixelated;cursor:crosshair;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+#hint{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:rgba(20,16,40,.78);color:#fff;font:600 .9rem "Pixelify Sans",monospace;padding:4px 10px;border-radius:8px;pointer-events:none}
+#hint:empty{display:none}
+.loading{position:absolute;inset:0;display:grid;place-items:center;background:#6cc04a;color:#1b1830;font:700 1.4rem "Pixelify Sans",monospace}
+.padA.padB{right:90px;bottom:16px;width:52px;height:52px}
+.stage.flash::after{content:"";position:absolute;inset:0;z-index:4;animation:enc .65s steps(6) forwards;pointer-events:none}
+@keyframes enc{0%{background:#fff}20%{background:#000}40%{background:#fff}60%{background:#000}100%{background:#000}}
+.tbox,.bt-panel,.bt-card,.joinBox form h2{font-family:"Pixelify Sans",monospace}
+.tbox{border-radius:6px;box-shadow:inset 0 0 0 3px #fffdf5,inset 0 0 0 5px #6a8ad0,0 4px 0 rgba(0,0,0,.35);font-size:1.08rem}
+.battle{background:linear-gradient(#bfe6ff 0 30%,#d8f2ff 30% 52%,#a8dc88 52% 70%,#90cc72 70%)}
+.bt-plat{position:relative;display:grid;place-items:center;width:clamp(120px,24vw,210px);height:clamp(80px,14vw,120px)}
+.bt-plat::before{content:"";position:absolute;bottom:0;left:0;right:0;height:38%;border-radius:50%;background:#7fbf5e;box-shadow:inset 0 -6px 0 #5f9c45,0 0 0 3px rgba(27,24,48,.25)}
+.bt-sprite{position:relative;image-rendering:pixelated;width:clamp(84px,15vw,140px);height:auto;filter:drop-shadow(0 4px 0 rgba(0,0,0,.18));animation:pop .4s steps(4)}
+canvas.bt-sprite.me{width:clamp(64px,10vw,96px);background:none;border-radius:0}
+.hp{display:flex;align-items:center;gap:6px;margin-top:4px}
+.hp b{font-size:.75rem;color:#f5c63b;background:#1b1830;padding:0 4px;border-radius:3px}
+.hpbar{flex:1;height:8px;background:#3b3550;border:2px solid #1b1830;border-radius:4px;overflow:hidden}
+.hpbar i{display:block;height:100%}
+
 .hud{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin:0 0 10px}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--muted);margin-right:6px}
 .dot.on{background:var(--good);box-shadow:0 0 8px var(--good)}
@@ -205,11 +241,9 @@ form.ev textarea{min-height:110px;resize:vertical}
 .tbox .btn{background:#fff;color:#1b1830;border-color:#cfcae0}
 .tbox .btn.primary{background:#5b3df5;color:#fff;border-color:#5b3df5}
 .tbox .muted{color:#5f5b78}
-.battle{position:absolute;inset:0;background:linear-gradient(#cfe9ff 0 55%,#9bd27e 55%);color:#1b1830;display:grid;grid-template-rows:1fr 1fr auto;padding:14px;gap:8px}
+.battle{position:absolute;inset:0;color:#1b1830;display:grid;grid-template-rows:1fr 1fr auto;padding:14px;gap:8px}
 .bt-foe,.bt-me{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .bt-me{flex-direction:row}
-.bt-sprite{font-size:clamp(3.5rem,11vw,6rem);filter:drop-shadow(0 6px 0 rgba(0,0,0,.2));animation:pop .4s ease-out}
-.bt-sprite.me{width:1.6em;height:1.6em;border-radius:50%;display:grid;place-items:center;background:var(--c);font-size:clamp(2rem,6vw,3rem)}
 .bt-card{background:#fffdf5;border:3px solid #1b1830;border-radius:10px;padding:8px 12px;min-width:min(260px,55vw);display:flex;flex-direction:column;gap:2px}
 .bt-card .bar{background:#e4e0f0}
 .bt-panel{background:#fffdf5;border:4px solid #1b1830;border-radius:12px;padding:10px 12px}
@@ -291,11 +325,16 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
   <section id="campus">
     <div class="hud">
       <span id="netStatus" class="small"></span>
-      <span class="small muted hide-sm">Move: arrows/WASD · Talk: Space · Chat: T</span>
+      <span class="small muted hide-sm">Move: arrows/WASD · Run: Shift · Talk: Space · Chat: T · Map: M · Zoom: +/−</span>
       <button class="btn sm" id="profileBtn">Name &amp; room</button>
     </div>
+    <div class="abilbar" id="abilbar" aria-label="Your abilities"></div>
     <div class="stage" id="stage" tabindex="0" aria-label="Campus map. Use arrow keys to move and Space to talk.">
       <canvas id="map"></canvas>
+      <div class="zoombar"><button class="btn sm" id="zoomOut" aria-label="Zoom out">−</button><span id="zoomTxt">1×</span><button class="btn sm" id="zoomIn" aria-label="Zoom in">+</button><button class="btn sm" id="miniBtn" aria-label="Toggle minimap">🗺️</button></div>
+      <canvas id="mini" title="Campus map: tap to set a waypoint to the nearest quest-giver"></canvas>
+      <div id="hint"></div>
+      <div class="loading" id="loading">Loading campus…</div>
       <div class="tbox" id="tbox" hidden></div>
       <div class="battle" id="battle" hidden></div>
       <div class="joinBox" id="joinBox" hidden></div>
@@ -304,13 +343,14 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
         <button data-pad="r" style="grid-area:r">▶</button><button data-pad="d" style="grid-area:d">▼</button>
       </div>
       <button class="padA" data-pad="a" aria-label="Talk / interact">A</button>
+      <button class="padA padB" data-pad="b" aria-label="Hold to run">B</button>
     </div>
     <div class="chatbar">
       <div id="chatLog" class="small"></div>
       <form id="chatForm"><input id="chatIn" maxlength="120" placeholder="Say something to people on campus…" autocomplete="off" aria-label="Chat message"><button class="btn sm primary">Send</button></form>
       <div class="emotes"><button class="btn sm" data-emote="👋">👋</button><button class="btn sm" data-emote="🎉">🎉</button><button class="btn sm" data-emote="📚">📚</button><button class="btn sm" data-emote="☕">☕</button><button class="btn sm" data-emote="🤝">🤝</button></div>
     </div>
-    <p class="small muted" style="margin-top:10px">Walk around campus and talk to anyone with a <b>!</b> to check in to ASPIRE quests. In-person quests can only be done at their location. Tall grass in Victoria Park and near the Charles Perkins Centre hides <b>challenges</b>: beat them using your capabilities as moves. Walk up to a classmate and press Space to wave or squad up. Check in to a quest with a squadmate nearby for a +25 XP bonus. The map is stylised and not to scale.</p>
+    <p class="small muted" style="margin-top:10px">The icons above are your <b>abilities</b>. Each one unlocks when a capability in your skill tree reaches the right HCS level, for example 👟 Running Shoes at Initiative &amp; Drive L1, 🗺️ the map at Problem Solving &amp; Data L1, 🚲 a bike at Innovative Thinking L2, and 🌊 Surf at LEAD Agility. Walk around campus and talk to anyone with a <b>!</b> to check in to ASPIRE quests. In-person quests can only be done at their location. The long grass in Victoria Park hides <b>challenges</b>: beat them using your capabilities as moves. Walk up to a classmate and press Space to wave or squad up. Check in to a quest with a squadmate nearby for a +25 XP bonus. The campus is built from real OpenStreetMap data, so buildings, paths and trees are where they really are.</p>
   </section>
 
   <section id="tree" hidden>
@@ -387,24 +427,21 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
       </div>
 
       <h2>2 · The skill tree = Human Capability Standards</h2>
-      <p>The tree uses the <b>Human Capability Standards (HCS)</b>, an Australian framework of durable, transferable capabilities first released in 2012 and revalidated in 2025 against 21 international frameworks (Bowles &amp; Wilson, 2025). We use its <b>education variant (HCS25-E)</b>, which the authors recommend for student development, micro-credentials and badges.</p>
-      <div class="tscroll"><table>
-        <tr><th>Branch</th><th>Capabilities</th><th>Why it's here</th></tr>
-        <tr><td><b style="color:var(--head)">HEAD</b><br>Thinking</td><td>Critical Thinking · Creativity · Adaptive Mindset</td><td>Core HCS cognitive domain</td></tr>
-        <tr><td><b style="color:var(--heart)">HEART</b><br>Personal</td><td>Empathy · Ethics · Collaboration</td><td>Core HCS social-emotional domain</td></tr>
-        <tr><td><b style="color:var(--hands)">HANDS</b><br>Action</td><td>Communication · Problem Solving &amp; Data · Digital Acumen</td><td>Core HCS applied domain. Digital Acumen is the HCS25-E swap for Customer Focus</td></tr>
-        <tr><td><b style="color:var(--leap)">LEAP</b><br>Learn · Engage · Aspire · Progress</td><td>Self-Direction · Lifelong Learning · Cultural Awareness · Innovative Thinking</td><td>The HCS school-to-work capabilities, which the education variant brings back. It even has "Aspire" in the name.</td></tr>
-        <tr><td><b style="color:var(--lead)">LEAD</b><br>Prestige branch</td><td>Leadership · Engagement &amp; Coaching · Agile &amp; Innovative · Direction &amp; Purpose</td><td>HCS25-E leaves LEAD out for students, so we keep it as a <b>locked branch</b> that opens once you have strong foundations. This is how the model "matures over time".</td></tr>
-      </table></div>
-
+      <p>The tree follows the <b>Human Capability Standards Reference Framework, Education Version 4 (2025)</b> from the Institute for Working Futures. It has 12 durable capabilities in three domains, and each capability has <b>four skills and four mindsets</b>. Every node in the tree shows the official HCS definition, its skills and mindsets, and the game abilities it unlocks. The LEAD prestige branch uses the HCS <b>L.E.A.D. leadership domain</b>, which the education version leaves out.</p>
+      <div class="tscroll"><table id="hcsTable"></table></div>
+      <h3>Levels = HCS proficiency levels</h3>
+      <p>HCS describes capability across seven levels of autonomy, responsibility and complexity, from Follow to Shape. A degree realistically covers Levels 1–5, so the game's five levels map directly to them. Levels 6 (Improve) and 7 (Shape) come with professional practice after graduation.</p>
+      <div class="tscroll"><table id="lvlTable"></table></div>
+      <h3>Abilities: what each level unlocks in the game</h3>
+      <div class="tscroll"><table id="abilTable"></table></div>
       <h2>3 · Achievement criteria and evidence requirements</h2>
       <div class="tscroll"><table>
         <tr><th>Level</th><th>Achievement criterion</th><th>Evidence required</th><th>Who confirms</th><th>Reward</th></tr>
-        <tr><td><b>1 Spark</b></td><td>Took part in an activity that builds this capability</td><td>Check-in to a tagged quest</td><td>Automatic</td><td>Quest XP</td></tr>
-        <tr><td><b>2 Reflect</b></td><td>Can explain what they did and learned</td><td>50+ word STAR reflection (Situation, Task, Action, Result)</td><td>Self (spot-checked)</td><td>+20 XP · portfolio entry (draft)</td></tr>
-        <tr><td><b>3 Apply</b></td><td>Used the capability to produce something real</td><td>Artefact (link or description) + endorsement</td><td>Peer, mentor or tutor</td><td>+40 XP · portfolio entry (endorsed)</td></tr>
-        <tr><td><b>4 Prove</b></td><td>Meets the HCS behavioural descriptor in a real setting</td><td>Verification against the HCS descriptor</td><td>Staff, employer or placement supervisor</td><td>+60 XP · digital credential</td></tr>
-        <tr><td><b>5 Uplift</b></td><td>Helps others build the capability</td><td>Evidence of mentoring, teaching or leading + verification</td><td>Staff or program lead</td><td>+100 XP · digital credential</td></tr>
+        <tr><td><b>1 Spark</b><br><span class="small muted">HCS L1 Follow</span></td><td>Took part in an activity that builds this capability</td><td>Check-in to a tagged quest</td><td>Automatic</td><td>Quest XP</td></tr>
+        <tr><td><b>2 Reflect</b><br><span class="small muted">HCS L2 Support</span></td><td>Can explain what they did and learned</td><td>50+ word STAR reflection (Situation, Task, Action, Result)</td><td>Self (spot-checked)</td><td>+20 XP · portfolio entry (draft)</td></tr>
+        <tr><td><b>3 Apply</b><br><span class="small muted">HCS L3 Action</span></td><td>Used the capability to produce something real</td><td>Artefact (link or description) + endorsement</td><td>Peer, mentor or tutor</td><td>+40 XP · portfolio entry (endorsed)</td></tr>
+        <tr><td><b>4 Prove</b><br><span class="small muted">HCS L4 Guide</span></td><td>Meets the HCS behavioural descriptor in a real setting</td><td>Verification against the HCS descriptor</td><td>Staff, employer or placement supervisor</td><td>+60 XP · digital credential</td></tr>
+        <tr><td><b>5 Own</b><br><span class="small muted">HCS L5 Execute</span></td><td>Plans own work and handles unfamiliar, non-routine problems</td><td>Something non-routine planned and delivered on own initiative + verification</td><td>Staff or program lead</td><td>+100 XP · digital credential</td></tr>
       </table></div>
 
       <h2>4 · Progression thresholds (ranks)</h2>
@@ -419,7 +456,7 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
         <tr><td>Online vs in-person</td><td>Every quest is tagged online, in person or either, and online quests are worth the same XP</td></tr>
         <tr><td>Support with AI</td><td>Digital Acumen + Ethics quests (responsible AI workshop)</td></tr>
         <tr><td>Work-integrated learning (WIL) · placements</td><td>Placements carry the most XP, and supervisors can verify Level 4</td></tr>
-        <tr><td>Racism, gender and inclusion</td><td>Cultural Awareness capability, opt-in visibility, and small squad boards instead of a public cohort ranking</td></tr>
+        <tr><td>Racism, gender and inclusion</td><td>Cultural Awareness capability (and its 🧭 landmark-discovery ability), opt-in visibility, and small squad boards instead of a public cohort ranking</td></tr>
         <tr><td>Intellectually stimulating</td><td>Case comps, hackathons and the LEAD prestige branch give high-achievers a stretch</td></tr>
       </table></div>
 
@@ -431,7 +468,7 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
             <li>XP, ranks and badges calculated from published rules (like this prototype)</li>
             <li>Reflection and endorsement forms in Canvas, with staff verification at existing events</li>
             <li>Portfolio feed as an exportable record</li>
-            <li>Core tree only (HEAD, HEART, HANDS, LEAP)</li>
+            <li>Core tree only (the 12 HCS Education capabilities in HEAD, HEART and HANDS)</li>
           </ul></div>
         <div class="card"><h3>Dream: mature over time</h3>
           <ul class="small" style="margin:0;padding-left:18px">
@@ -462,73 +499,117 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
         <li>Who should be able to verify Level 4, and how do we make that easy for employers?</li>
         <li>How do we make sure students who work 20+ hours a week aren't left behind?</li>
       </ol>
-      <p class="small muted">Source: Bowles, M. &amp; Wilson, P. T. (2025). <a href="https://marcbowles.com/wp-content/uploads/2025/07/Report_Revalidation-of-HUman-Capabilities-19-May-2025.pdf" target="_blank" rel="noopener">Revalidating the Human Capability Standards</a>. Capability descriptions in this prototype are our own plain-English summaries.</p>
+      <p class="small muted">Sources: Institute for Working Futures (2025), <a href="https://www.workingfutures.com.au/human-capability/" target="_blank" rel="noopener">Human Capability Standards Reference Framework, Education Version 4</a>; Human Capability Standards seven-level framework (2020/2022); Bowles, M. &amp; Wilson, P. T. (2025). <a href="https://marcbowles.com/wp-content/uploads/2025/07/Report_Revalidation-of-HUman-Capabilities-19-May-2025.pdf" target="_blank" rel="noopener">Revalidating the Human Capability Standards</a>. HCS definitions are quoted from the framework, and LEAD descriptions and level summaries are our own paraphrases. Campus map data © OpenStreetMap contributors (ODbL).</p>
     </div>
   </section>
 </main>
 
-<footer><div class="wrap">Student prototype by WORK3601 Team 1 for the BCom ASPIRE Recognition &amp; Progression brief. Not an official University system. Progress is saved only in this browser.</div></footer>
+<footer><div class="wrap">Student prototype by WORK3601 Team 1 for the BCom ASPIRE Recognition &amp; Progression brief. Not an official University system. Progress is saved only in this browser. Campus map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>.</div></footer>
 
 <dialog id="dlg"><div class="dlg" id="dlgBody"></div></dialog>
 <div id="toasts" aria-live="polite"></div>
 
 <script>
+// Skill tree = Human Capability Standards Reference Framework, Education Version 4 (Institute for Working Futures, 2025):
+// 12 capabilities in HEAD / HEART / HANDS, each with four skills and four mindsets. LEAD = the HCS L.E.A.D. leadership domain (2020/2022 edition).
 const DOMAINS = {
-  head:  {name:'HEAD',  sub:'Thinking', c:'--head'},
-  heart: {name:'HEART', sub:'Personal', c:'--heart'},
-  hands: {name:'HANDS', sub:'Action',   c:'--hands'},
-  leap:  {name:'LEAP',  sub:'Learn · Engage · Aspire · Progress', c:'--leap'},
-  lead:  {name:'LEAD',  sub:'Prestige branch · unlocks over time', c:'--lead'},
+  head:  {name:'HEAD',  sub:'Cognition: how people think', c:'--head'},
+  heart: {name:'HEART', sub:'Feelings and emotions', c:'--heart'},
+  hands: {name:'HANDS', sub:'Conduct of work and interactions', c:'--hands'},
+  lead:  {name:'LEAD',  sub:'HCS leadership domain · prestige branch', c:'--lead'},
 };
 const CAPS = [
-  {id:'crit',  d:'head',  n:'Critical Thinking', desc:'Questions assumptions, weighs evidence and reaches sound, reasoned judgements.'},
-  {id:'crea',  d:'head',  n:'Creativity', desc:'Generates original ideas and fresh ways of framing a problem.'},
-  {id:'adapt', d:'head',  n:'Adaptive Mindset', desc:'Stays effective, curious and resilient when plans change or things go wrong.'},
-  {id:'emp',   d:'heart', n:'Empathy', desc:'Understands other people’s perspectives and feelings and responds with care.'},
-  {id:'eth',   d:'heart', n:'Ethics', desc:'Acts with integrity and weighs the impact of decisions, including how AI is used.'},
-  {id:'collab',d:'heart', n:'Collaboration', desc:'Works with others toward shared goals, builds trust and shares the load.'},
-  {id:'comm',  d:'hands', n:'Communication', desc:'Shares ideas clearly in writing, speech and visuals, and listens actively.'},
-  {id:'psd',   d:'hands', n:'Problem Solving & Data', desc:'Breaks problems down and uses data and evidence to find workable solutions.'},
-  {id:'dig',   d:'hands', n:'Digital Acumen', desc:'Uses digital tools and AI confidently, critically and safely to get work done.'},
-  {id:'self',  d:'leap',  n:'Self-Direction', desc:'Takes initiative, sets goals and follows through without being told.'},
-  {id:'life',  d:'leap',  n:'Lifelong Learning', desc:'Seeks out feedback and new learning, and reflects to keep growing.'},
-  {id:'cult',  d:'leap',  n:'Cultural Awareness', desc:'Respects and works effectively across cultures, backgrounds and identities.'},
-  {id:'innov', d:'leap',  n:'Innovative Thinking', desc:'Turns ideas into practical improvements that add real value.'},
-  {id:'lead',  d:'lead',  n:'Leadership', desc:'Sets direction and brings people with you.', req:{collab:3, comm:3}},
-  {id:'coach', d:'lead',  n:'Engagement & Coaching', desc:'Develops others and keeps teams motivated.', req:{emp:3, life:3}},
-  {id:'agile', d:'lead',  n:'Agile & Innovative', desc:'Leads change and experimentation in fast-moving settings.', req:{innov:3, adapt:3}},
-  {id:'purp',  d:'lead',  n:'Direction & Purpose', desc:'Connects work to a clear purpose and delivers results.', req:{self:3, eth:3}},
+  {id:'crit', d:'head', n:'Critical Thinking', def:'Uses a range of tools or methods to critically examine and assess existing information, thinking, assumptions and issues to present well-reasoned insights or to make judgements.',
+    skills:['Analytical','Objective','Judicious','Rational'], minds:['Analysis','Objectivity','Rigor','Logic']},
+  {id:'crea', d:'head', n:'Creativity', def:'Actively contributes to creative works, ideas or novel solutions.',
+    skills:['Original','Open-minded','Explorative','Reflective'], minds:['Growth','Imagination','Introspection','Inspiration']},
+  {id:'innov', d:'head', n:'Innovative Thinking', def:'Challenges and extends current thinking and practices.',
+    skills:['Courageous','Experimental','Innovative','Adaptive'], minds:['Challenge','Curiosity','Improvement','Courage']},
+  {id:'drive', d:'head', n:'Initiative & Drive', def:'Appreciates own strengths and weaknesses and effectively works with others in a professional manner.',
+    skills:['Professional','Prioritising','Self-directed','Accountable'], minds:['Responsibility','Vision','Initiative','Opportunity']},
+  {id:'eth', d:'heart', n:'Ethics', def:'Acts with integrity and in conformance with social and professional standards of ethical conduct.',
+    skills:['Integrity','Conduct','Responsible','Compliant'], minds:['Accountability','Commitment','Responsibility','Honesty']},
+  {id:'cult', d:'heart', n:'Cultural Awareness', def:'Engages others with sensitivity and regard for diversity and the social or cultural differences that influence behaviour.',
+    skills:['Diversity and inclusion','Cultural sensitivity','Values orientation','Cultural alignment'], minds:['Inclusivity','Empowerment','Recognition','Citizenship']},
+  {id:'emp', d:'heart', n:'Empathy', def:'Recognises and regulates their own emotions in any situation and is good at identifying and respecting the needs and feelings of other people.',
+    skills:['Sensitive','Mindful','Self-aware','Inclusive'], minds:['Care','Compassion','Consideration','Inclusion']},
+  {id:'collab', d:'heart', n:'Collaboration', def:'Works collaboratively with all types of people, contributes to teamwork and builds relationships and networks across a range of people or groups.',
+    skills:['Cooperative','Respectful','Relationship-building','Stakeholder-focused'], minds:['Helpfulness','Tolerance','Trustworthiness','Respect']},
+  {id:'comm', d:'hands', n:'Communication', def:'Communicates with clarity and impact to facilitate individual and collective understanding, action and information exchange.',
+    skills:['Storytelling','Meaningful','Engages others','Influence'], minds:['Perspective taking','Persuasion','Sincerity','Care']},
+  {id:'psd', d:'hands', n:'Problem Solving & Data', def:'Uses data to define and analyse problems, generate optimal solutions and make recommendations.',
+    skills:['Problem identification','Analysis','Solutions','Insightful & visualising'], minds:['Methodology','Resourcefulness','Solution','Ambiguity']},
+  {id:'life', d:'hands', n:'Lifelong Learning', def:'Identifies and continuously develops one’s own knowledge, skills and personal attributes such as mindset and motivation.',
+    skills:['Growth mindset','Self-aware','Continuous learning','Driven'], minds:['Growth mindset','Resilience','Optimism','Flexibility']},
+  {id:'dig', d:'hands', n:'Digital Acumen', def:'Uses digital technology to undertake workplace tasks and improve productive outcomes.',
+    skills:['Technologically savvy','Safety & security','Information handling','Deployment'], minds:['Readiness','Perspective','Flexibility','Analysis']},
+  {id:'lead', d:'lead', n:'Leadership', def:'Participative, side-by-side leadership that brings people with you.', skills:['Vision','Influence','Empowering others','Decision-making'], minds:['Integrity','Courage','Service','Accountability'], req:{collab:3, comm:3}},
+  {id:'engage', d:'lead', n:'Engagement & Culture', def:'Engages people to perform and to invest emotionally in change, building a positive culture.', skills:['Coaching','Recognition','Inclusion','Wellbeing'], minds:['Care','Trust','Respect','Belonging'], req:{emp:3, cult:3}},
+  {id:'agile', d:'lead', n:'Agility', def:'Speeds up transformation by experimenting, adapting and learning fast.', skills:['Experimentation','Adaptation','Iteration','Learning'], minds:['Curiosity','Resilience','Openness','Pace'], req:{innov:3, life:3}},
+  {id:'purp', d:'lead', n:'Direction & Purpose', def:'Communicates a vision that reaches over the horizon and delivers results.', skills:['Strategy','Planning','Delivery','Alignment'], minds:['Purpose','Vision','Ownership','Focus'], req:{drive:3, eth:3}},
 ];
+CAPS.forEach(c=>{ c.desc=c.def; });
 const CAP = Object.fromEntries(CAPS.map(c=>[c.id,c]));
-const CORE = ['head','heart','hands','leap'];
+const CORE = ['head','heart','hands'];
+// Five game levels = HCS proficiency levels 1-5 (Follow to Execute). HCS Levels 6-7 (Improve, Shape) are professional-practice levels beyond a degree.
 const LEVELS = [
   null,
-  {n:'Spark',   bonus:0,   who:'Automatic',               need:'Check in to a quest tagged with this capability.'},
-  {n:'Reflect', bonus:20,  who:'Self (spot-checked)',     need:'Write a 50+ word STAR reflection (Situation, Task, Action, Result).'},
-  {n:'Apply',   bonus:40,  who:'Peer, mentor or tutor',   need:'Share an artefact showing you applied it, endorsed by a peer, mentor or tutor.'},
-  {n:'Prove',   bonus:60,  who:'Staff, employer or supervisor', need:'Verified by staff, an employer or placement supervisor against the HCS descriptor.'},
-  {n:'Uplift',  bonus:100, who:'Staff or program lead',   need:'Show how you helped others build this capability, with verification.'},
+  {n:'Spark',   hcs:'Level 1 · Follow',  hd:'Little prior experience; works under close supervision and relies on established rules and procedures.', bonus:0,   who:'Automatic',               need:'Check in to a quest tagged with this capability.'},
+  {n:'Reflect', hcs:'Level 2 · Support', hd:'Has prior learning and some practice that informs judgement; works under routine direction.', bonus:20,  who:'Self (spot-checked)',     need:'Write a 50+ word STAR reflection (Situation, Task, Action, Result) naming one of the capability’s HCS skills.'},
+  {n:'Apply',   hcs:'Level 3 · Action',  hd:'Uses personal discretion to resolve familiar problems, still drawing on established procedures.', bonus:40,  who:'Peer, mentor or tutor',   need:'Share an artefact showing you applied it, endorsed by a peer, mentor or tutor.'},
+  {n:'Prove',   hcs:'Level 4 · Guide',   hd:'Significant practical experience; completes allocated tasks to clearly defined goals under general direction.', bonus:60,  who:'Staff, employer or supervisor', need:'Verified by staff, an employer or placement supervisor against the HCS Level 4 descriptor.'},
+  {n:'Own',     hcs:'Level 5 · Execute', hd:'Plans own work and uses systematic approaches to handle unfamiliar situations and non-routine problems.', bonus:100, who:'Staff or program lead',   need:'Plan and deliver something non-routine on your own initiative, verified against the HCS Level 5 descriptor.'},
+];
+// In-game abilities unlocked by capability levels
+const ABIL = [
+  {id:'inspect', cap:'crit', l:1, i:'🔍', n:'Inspect', d:'See each challenge’s weakness and resistance in battle.'},
+  {id:'foresight', cap:'crit', l:3, i:'👁️', n:'Foresight', d:'Take 25% less damage in challenges.'},
+  {id:'style', cap:'crea', l:1, i:'🎨', n:'Style Studio', d:'Change your hairstyle and cap in Name & room.'},
+  {id:'brainstorm', cap:'crea', l:3, i:'💡', n:'Brainstorm', d:'Creativity moves can never be resisted.'},
+  {id:'bike', cap:'innov', l:2, i:'🚲', n:'Bicycle', d:'Press R to ride a bike, the fastest way across campus.'},
+  {id:'secondwind', cap:'innov', l:4, i:'🔁', n:'Second Wind', d:'Bounce back to 40 energy after losing a challenge.'},
+  {id:'run', cap:'drive', l:1, i:'👟', n:'Running Shoes', d:'Hold Shift (or B) to run.'},
+  {id:'stamina', cap:'drive', l:3, i:'🔋', n:'Stamina', d:'Max energy rises to 130.'},
+  {id:'fair', cap:'eth', l:1, i:'⚖️', n:'Fair Play', d:'Daily challenge XP cap rises from 75 to 100.'},
+  {id:'shield', cap:'eth', l:3, i:'🛡️', n:'Integrity Shield', d:'The first hit in every challenge is blocked.'},
+  {id:'explorer', cap:'cult', l:1, i:'🧭', n:'Explorer’s Eye', d:'Landmark stars appear on campus. Discover each one for +10 XP.'},
+  {id:'readroom', cap:'emp', l:1, i:'💬', n:'Read the Room', d:'See classmates’ rank and strongest capability.'},
+  {id:'comfort', cap:'emp', l:3, i:'🤗', n:'Comfort', d:'Your 🤗 emote restores 25 energy to classmates near you.'},
+  {id:'squadup', cap:'collab', l:1, i:'🤝', n:'Squad Up', d:'Send squad invites to classmates you meet.'},
+  {id:'teamspirit', cap:'collab', l:3, i:'🎽', n:'Team Spirit', d:'Squad bonus works from 30 m away and is worth +35 XP.'},
+  {id:'megaphone', cap:'comm', l:1, i:'📣', n:'Megaphone', d:'Start a chat message with ! to shout it to the whole campus.'},
+  {id:'persuade', cap:'comm', l:3, i:'🗣️', n:'Persuasion', d:'+5 XP on every quest check-in.'},
+  {id:'map', cap:'psd', l:1, i:'🗺️', n:'Campus Map', d:'Unlocks the minimap (M).'},
+  {id:'waypoint', cap:'psd', l:2, i:'📍', n:'Waypoints', d:'Tap the minimap to route to the nearest quest-giver.'},
+  {id:'notes', cap:'life', l:1, i:'📓', n:'Field Notes', d:'After a win, jump straight into a reflection draft.'},
+  {id:'regen', cap:'life', l:3, i:'🌱', n:'Resilience', d:'Energy slowly regenerates as you walk.'},
+  {id:'app', cap:'dig', l:1, i:'📱', n:'Campus App', d:'See who is online and your squad on the minimap.'},
+  {id:'travel', cap:'dig', l:2, i:'🚌', n:'Fast Travel', d:'Press F to ride the shuttle to any quest-giver you have met.'},
+  {id:'rally', cap:'lead', l:1, i:'🚩', n:'Rally', d:'Moves hit +6 harder while a squadmate is within 20 m.'},
+  {id:'coach', cap:'engage', l:1, i:'🧑‍🏫', n:'Coach', d:'Comfort restores 50 energy instead of 25.'},
+  {id:'surf', cap:'agile', l:1, i:'🌊', n:'Surf', d:'Cross Lake Northam and the pools.'},
+  {id:'fly', cap:'purp', l:1, i:'🦅', n:'Fly', d:'Tap anywhere on the minimap to fly there.'},
 ];
 const QUESTS = [
   {id:'welcome',   n:'Welcome Week event',               xp:30,  s:'Welcome',     m:'In person', rep:false, t:['collab','cult','life']},
   {id:'study',     n:'Study group / peer learning session', xp:15, s:'Belonging', m:'Either',    rep:true,  t:['collab','life']},
-  {id:'mentee',    n:'Mentoring catch-up (as mentee)',   xp:20,  s:'Mentoring',   m:'Either',    rep:true,  t:['life','self','comm']},
+  {id:'mentee',    n:'Mentoring catch-up (as mentee)',   xp:20,  s:'Mentoring',   m:'Either',    rep:true,  t:['life','drive','comm']},
   {id:'mentor',    n:'Peer mentor for a semester',       xp:100, s:'Mentoring',   m:'Either',    rep:false, t:['emp','comm','collab']},
-  {id:'leadws',    n:'Leadership workshop',              xp:40,  s:'Leadership',  m:'In person', rep:true,  t:['adapt','self','eth']},
-  {id:'club',      n:'Society or club committee role',   xp:60,  s:'Leadership',  m:'In person', rep:false, t:['collab','self','innov']},
-  {id:'openday',   n:'Open Day ambassador shift',        xp:60,  s:'Open Day',    m:'In person', rep:true,  t:['comm','emp','self']},
+  {id:'leadws',    n:'Leadership workshop',              xp:40,  s:'Leadership',  m:'In person', rep:true,  t:['drive','eth','innov']},
+  {id:'club',      n:'Society or club committee role',   xp:60,  s:'Leadership',  m:'In person', rep:false, t:['collab','drive','innov']},
+  {id:'openday',   n:'Open Day ambassador shift',        xp:60,  s:'Open Day',    m:'In person', rep:true,  t:['comm','emp','cult']},
   {id:'industry',  n:'Industry panel or employer event', xp:40,  s:'Employer engagement', m:'Either', rep:true, t:['comm','crit','cult']},
   {id:'casecomp',  n:'Case competition',                 xp:80,  s:'Employer engagement', m:'Either', rep:true, t:['psd','crea','collab','crit']},
   {id:'hack',      n:'Innovation sprint / hackathon',    xp:70,  s:'Employer engagement', m:'Either', rep:true, t:['innov','crea','dig']},
-  {id:'wil',       n:'Placement or internship (WIL)',    xp:150, s:'Employer engagement', m:'In person', rep:true, t:['psd','comm','adapt','dig']},
+  {id:'wil',       n:'Placement or internship (WIL)',    xp:150, s:'Employer engagement', m:'In person', rep:true, t:['psd','comm','drive','dig']},
   {id:'ai',        n:'Responsible AI skills workshop',   xp:30,  s:'Learning',    m:'Online',    rep:true,  t:['dig','eth','crit']},
-  {id:'job',       n:'Life Counts: part-time job reflection', xp:40, s:'Life Counts', m:'Online', rep:true, t:['comm','psd','emp','adapt','self']},
-  {id:'care',      n:'Life Counts: caring or volunteering', xp:40, s:'Life Counts', m:'Online',  rep:true,  t:['emp','eth','cult','adapt']},
+  {id:'job',       n:'Life Counts: part-time job reflection', xp:40, s:'Life Counts', m:'Online', rep:true, t:['comm','psd','emp','drive','life']},
+  {id:'care',      n:'Life Counts: caring or volunteering', xp:40, s:'Life Counts', m:'Online',  rep:true,  t:['emp','eth','cult','life']},
 ];
 const RANKS = [
   {n:'Rookie',            c:'#8a8aa0', xp:0},
   {n:'Explorer',          c:'#2f8fd8', xp:150,  rule:'3 capabilities at Level 1+',             ok:s=>count(1)>=3},
-  {n:'Bronze Builder',    c:'#b8733a', xp:400,  rule:'Level 2+ in every core branch',          ok:s=>CORE.every(d=>CAPS.some(c=>c.d===d&&lvl(c.id)>=2))},
+  {n:'Bronze Builder',    c:'#b8733a', xp:400,  rule:'Level 2+ in each of HEAD, HEART and HANDS', ok:s=>CORE.every(d=>CAPS.some(c=>c.d===d&&lvl(c.id)>=2))},
   {n:'Silver Achiever',   c:'#8e9bb0', xp:800,  rule:'4 capabilities at Level 3+, including one at Level 4', ok:s=>count(3)>=4&&count(4)>=1},
   {n:'Gold ASPIRE Champion', c:'#d4a017', xp:1400, rule:'3 capabilities at Level 4+, and one at Level 5', ok:s=>count(4)>=3&&count(5)>=1},
 ];
@@ -540,13 +621,13 @@ const BADGES = [
   {id:'head',   i:'🧠', n:'Thinker',       r:'Every HEAD capability at Level 2+',          t:()=>dom('head',2)},
   {id:'heart',  i:'💗', n:'Connector',     r:'Every HEART capability at Level 2+',         t:()=>dom('heart',2)},
   {id:'hands',  i:'🛠️', n:'Doer',          r:'Every HANDS capability at Level 2+',         t:()=>dom('hands',2)},
-  {id:'leap',   i:'🐸', n:'Leaper',        r:'Every LEAP capability at Level 2+',          t:()=>dom('leap',2)},
   {id:'amb',    i:'🎓', n:'Ambassador',    r:'Do an Open Day ambassador shift',            t:()=>!!S.q.openday},
   {id:'mentor', i:'🤝', n:'Mentor',        r:'Be a peer mentor for a semester',            t:()=>!!S.q.mentor},
   {id:'squad',  i:'👥', n:'Squad Goals',   r:'Complete a squad quest',                     t:()=>S.squad>0},
+  {id:'land',   i:'⭐', n:'Landmarker',    r:'Discover every campus landmark',             t:()=>Object.keys(S.landmarks||{}).length>=8},
   {id:'wide',   i:'🌈', n:'Well-Rounded',  r:'10 capabilities at Level 2+',                t:()=>count(2)>=10},
   {id:'proof',  i:'✅', n:'Verified',      r:'First Level 4 (verified) capability',        t:()=>count(4)>=1},
-  {id:'uplift', i:'🌱', n:'Trailblazer',   r:'First Level 5 (helped others grow)',         t:()=>count(5)>=1},
+  {id:'uplift', i:'🌱', n:'Trailblazer',   r:'First Level 5 (HCS Execute)',                t:()=>count(5)>=1},
   {id:'lead',   i:'👑', n:'Prestige',      r:'Unlock a LEAD branch capability',            t:()=>CAPS.some(c=>c.d==='lead'&&unlocked(c))},
   {id:'gold',   i:'🏆', n:'Champion',      r:'Reach Gold ASPIRE Champion rank',            t:()=>rank()===4},
 ];
@@ -558,6 +639,9 @@ const KEY='aspire-quest-v1';
 const fresh = ()=>({name:'Your name', xp:0, caps:{}, q:{}, log:[], squad:0, optIn:true});
 let S = fresh();
 try{ const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(fresh(),JSON.parse(raw)); }catch(e){}
+// migrate saves from the first prototype (Adaptive Mindset and Self-Direction now sit inside HCS Innovative Thinking and Initiative & Drive)
+[['self','drive'],['adapt','innov'],['coach','engage']].forEach(([o,n])=>{ if(S.caps[o]&&!S.caps[n]) S.caps[n]=S.caps[o]; delete S.caps[o]; });
+const can = id => { const a=ABIL.find(x=>x.id===id); return !!a && lvl(a.cap)>=a.l && unlocked(CAP[a.cap]); };
 const keepId=()=>({joined:S.joined,color:S.color,room:S.room,friends:S.friends,pos:S.pos,name:S.name});
 const save=()=>{ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} };
 
@@ -577,7 +661,8 @@ const cv = d=>`var(${DOMAINS[d].c})`;
 function snap(){ return {r:rank(), b:BADGES.filter(b=>b.t()).map(b=>b.id), l:Object.fromEntries(CAPS.map(c=>[c.id,lvl(c.id)]))}; }
 function commit(fn){
   const a=snap(); fn(); save(); render(); const b=snap();
-  CAPS.forEach(c=>{ if(b.l[c.id]>a.l[c.id]) toast(`⬆️ ${c.n} reached Level ${b.l[c.id]}: ${LEVELS[b.l[c.id]].n}`); });
+  CAPS.forEach(c=>{ if(b.l[c.id]>a.l[c.id]){ toast(`⬆️ ${c.n} reached HCS ${LEVELS[b.l[c.id]].hcs}`);
+    ABIL.filter(x=>x.cap===c.id&&x.l>a.l[c.id]&&x.l<=b.l[c.id]).forEach(x=>toast(`${x.i} New ability: ${x.n}. ${x.d}`)); } });
   b.b.filter(x=>!a.b.includes(x)).forEach(id=>{ const bd=BADGES.find(x=>x.id===id); toast(`${bd.i} Badge unlocked: ${bd.n}`); });
   if(b.r>a.r) toast(`🎉 Rank up! You're now ${RANKS[b.r].n}`);
   window.Campus && Campus.sync();
@@ -605,15 +690,17 @@ function render(){
     $('#goal').innerHTML=`<b>🏆 Gold ASPIRE Champion</b><span class="muted">You've maxed the S1 2027 ranks. The LEAD branch is your next frontier.</span>`;
   }
   renderTree(); renderQuests(); renderBadges(); renderSquad(); renderPortfolio();
+  window.Campus && Campus.sync();
 }
 function nodeHTML(c){
   const l=lvl(c.id), p=pending(c.id), lock=!unlocked(c);
   const pips=[1,2,3,4,5].map(n=>`<i class="${n<=l?'f':(p&&p.level===n?'p':'')}"></i>`).join('');
   const sub = lock ? '🔒 Needs '+Object.entries(c.req).map(([k,v])=>`${CAP[k].n} L${v}`).join(' + ')
-            : l? `Level ${l} · ${LEVELS[l].n}` : 'Not started';
+            : l? `HCS ${LEVELS[l].hcs} · ${LEVELS[l].n}` : 'Not started';
+  const ab=ABIL.filter(a=>a.cap===c.id).map(a=>`<span class="ab ${lvl(c.id)>=a.l&&!lock?'on':''}" title="${a.n} (Level ${a.l}): ${a.d}">${a.i}</span>`).join('');
   return `<button class="node ${l?'on':''} ${lock?'locked':''}" data-cap="${c.id}" style="--dc:${cv(c.d)}">
     <span class="orb"></span><span class="nbody"><div class="nm">${c.n}</div><div class="lv">${sub}</div>
-    <div class="pips">${pips}</div>${p?'<div class="pend">⏳ awaiting endorsement</div>':''}</span></button>`;
+    <div class="pips">${pips}</div><div class="abs">${ab}</div>${p?'<div class="pend">⏳ awaiting endorsement</div>':''}</span></button>`;
 }
 function renderTree(){
   $('#treeGrid').innerHTML = CORE.map(d=>{
@@ -689,13 +776,19 @@ function openCap(id){
     }[next];
     action=`<form class="ev" data-level="${next}" data-cap="${id}"><b>Unlock Level ${next} · ${LEVELS[next].n}</b><span class="small muted">${LEVELS[next].need}</span>${f}
       <button class="btn primary" type="submit">${next===2?'Save reflection':'Submit for '+(next===3?'endorsement':'verification')}</button></form>`;
-  } else action=`<div class="callout">🌟 Maxed. You're helping others grow this capability.</div>`;
+  } else action=`<div class="callout">🌟 HCS Level 5 (Execute) reached, the top of the student range. HCS Levels 6 (Improve) and 7 (Shape) come with professional practice after graduation.</div>`;
 
-  const ladder=LEVELS.slice(1).map((L,i)=>{const n=i+1; return `<li class="${n<=l?'done':''} ${n===next&&!lock?'cur':''}"><span class="n">${n<=l?'✓':n}</span><span><b>${L.n}</b> <span class="small muted">· ${L.who}${L.bonus?` · +${L.bonus} XP`:''}</span><br><span class="small">${L.need}</span></span></li>`;}).join('');
+  const ladder=LEVELS.slice(1).map((L,i)=>{const n=i+1; return `<li class="${n<=l?'done':''} ${n===next&&!lock?'cur':''}"><span class="n">${n<=l?'✓':n}</span><span><b>${L.n}</b> <span class="chip">HCS ${L.hcs}</span> <span class="small muted">· ${L.who}${L.bonus?` · +${L.bonus} XP`:''}</span><br><span class="small">${L.need}</span><br><span class="small muted">HCS: ${L.hd}</span></span></li>`;}).join('');
   const hist=ents(id).filter(e=>e.st==='v').map(e=>`<li class="small">L${e.level} · ${e.date} · ${esc(e.text.slice(0,90))}${e.text.length>90?'…':''}</li>`).join('');
   show(`<div style="--dc:${cv(c.d)}"><button class="x" data-close aria-label="Close">×</button>
     <span class="chip c" style="--cc:${cv(c.d)}">${DOMAINS[c.d].name} · ${DOMAINS[c.d].sub}</span>
-    <h2 style="margin-top:8px">${c.n}</h2><p>${c.desc}</p>
+    <h2 style="margin-top:8px">${c.n}</h2>
+    <p class="hcsdef"><b>HCS definition:</b> “${c.def}”</p>
+    <div class="hcsgrid"><div><b class="small">HCS skills</b><div class="meta">${c.skills.map((k,i)=>`<span class="chip c ${lvl(id)>i?'got':''}" style="--cc:${cv(c.d)}" title="Battle move unlocked at Level ${i+1}">${k}</span>`).join('')}</div></div>
+      <div><b class="small">HCS mindsets</b><div class="meta">${c.minds.map(k=>`<span class="chip">${k}</span>`).join('')}</div></div></div>
+    <h3 style="margin-top:12px">In-game unlocks</h3>
+    <div class="ablist">${ABIL.filter(a=>a.cap===id).map(a=>`<div class="abrow ${l>=a.l&&!lock?'on':''}"><span class="ab on">${a.i}</span><span><b>${a.n}</b> <span class="small muted">· Level ${a.l}</span><br><span class="small">${a.d}</span></span></div>`).join('')}
+      <div class="abrow on"><span class="ab on">⚔️</span><span><b>Battle moves</b> <span class="small muted">· every level</span><br><span class="small">Each level teaches the next HCS skill as a move (${c.skills.join(' → ')}), and each level hits harder.</span></span></div></div>
     <ol class="ladder">${ladder}</ol>${action}${hist?`<h3>Evidence log</h3><ul style="padding-left:18px;margin:0">${hist}</ul>`:''}</div>`);
   const t=$('#dlgBody textarea');
   if(t&&next===2) t.addEventListener('input',()=>{$('#wc').textContent=words(t.value)+' words';});
@@ -735,8 +828,9 @@ document.addEventListener('submit',e=>{
   if(f.dataset.questform){
     const cap=f.querySelector('input[name=cap]:checked').value, qid=f.dataset.questform;
     const near=window.Campus?Campus.nearby():[];
-    commit(()=>{ doQuest(qid,cap); if(near.length){ S.squad++; S.xp+=25; } });
-    if(near.length) toast(`👥 Went together with ${near.slice(0,3).join(', ')}: +25 XP squad bonus`);
+    const sb=can('teamspirit')?35:25;
+    commit(()=>{ doQuest(qid,cap); if(can('persuade')) S.xp+=5; if(near.length){ S.squad++; S.xp+=sb; } });
+    if(near.length) toast(`👥 Went together with ${near.slice(0,3).join(', ')}: +${sb} XP squad bonus`);
     dlg.close(); return;
   }
   const n=+f.dataset.level, id=f.dataset.cap, text=f.querySelector('#t').value.trim();
@@ -763,11 +857,12 @@ $('#resetBtn').addEventListener('click',()=>{ if(confirm('Reset all progress in 
 $('#sampleBtn').addEventListener('click',()=>{
   // Sam: first-year, works part-time, mid-way through S1
   S=Object.assign(fresh(),keepId()); S.name='Sam (demo)';
-  const plan={welcome:'collab',study:'life',mentee:'self',openday:'comm',job:'adapt',industry:'crit',casecomp:'psd',ai:'dig',care:'emp',hack:'crea',club:'innov'};
+  const plan={welcome:'collab',study:'life',mentee:'drive',openday:'comm',job:'life',industry:'crit',casecomp:'psd',ai:'dig',care:'emp',hack:'crea',club:'innov'};
   Object.entries(plan).forEach(([q,c])=>doQuest(q,c));
   doQuest('industry','cult'); doQuest('leadws','eth');
   const R='Situation: our case competition team had two days to analyse a retailer losing market share. Task: I owned the customer data. Action: I cleaned the survey data, built pivot tables, and challenged our first assumption when the numbers did not support it. Result: we pivoted to a loyalty strategy and placed second. I learned to let evidence lead the argument.';
-  ['collab','life','comm','psd','crit','adapt','emp','dig','self'].forEach(c=>{ ents(c).push({level:2,st:'v',date:'2027-04-02',text:R}); S.xp+=20; });
+  ['collab','life','comm','psd','crit','innov','emp','dig','drive'].forEach(c=>{ ents(c).push({level:2,st:'v',date:'2027-04-02',text:R}); S.xp+=20; });
+  ents('innov').push({level:2,st:'v',date:'2027-04-03',text:R}); S.xp+=20;
   ents('psd').push({level:3,st:'v',date:'2027-04-20',text:'Case competition financial model and data appendix',by:'Maria Chen (Mentor)'}); S.xp+=40;
   ents('comm').push({level:3,st:'v',date:'2027-04-22',text:'Open Day talk to 40 prospective students and their parents',by:'Priya N. (Peer)'}); S.xp+=40;
   ents('comm').push({level:4,st:'p',date:'2027-05-01',text:'Weekly client updates during part-time role at a café group',by:'J. Lee (Employer)'});
@@ -779,8 +874,12 @@ addEventListener('DOMContentLoaded',()=>{ // after campus.js has loaded
   let startTab='campus'; try{ startTab=localStorage.getItem(KEY+'-tab')||'campus'; }catch(e){}
   selectTab(startTab);
 });
+document.getElementById('hcsTable').innerHTML='<tr><th>Domain</th><th>Capability</th><th>HCS skills</th><th>HCS mindsets</th></tr>'+CAPS.map(c=>`<tr><td><b style="color:var(${DOMAINS[c.d].c})">${DOMAINS[c.d].name}</b></td><td><b>${c.n}</b><br><span class="small muted">${c.def}</span></td><td class="small">${c.skills.join(' · ')}</td><td class="small">${c.minds.join(' · ')}</td></tr>`).join('');
+document.getElementById('lvlTable').innerHTML='<tr><th>Game level</th><th>HCS level</th><th>HCS stage (summary)</th><th>Evidence in ASPIRE</th></tr>'+LEVELS.slice(1).map((L,i)=>`<tr><td><b>${i+1} ${L.n}</b></td><td>${L.hcs}</td><td class="small">${L.hd}</td><td class="small">${L.need}</td></tr>`).join('')+'<tr><td class="muted">After graduation</td><td>Level 6 · Improve<br>Level 7 · Shape</td><td class="small">Leads and directs others, then shapes practice with long-term impact.</td><td class="small muted">Beyond the student program</td></tr>';
+document.getElementById('abilTable').innerHTML='<tr><th>Ability</th><th>Unlocked by</th><th>What it does</th></tr>'+ABIL.map(a=>`<tr><td>${a.i} <b>${a.n}</b></td><td>${CAP[a.cap].n} · Level ${a.l}</td><td class="small">${a.d}</td></tr>`).join('');
 document.getElementById('rankTable').innerHTML='<tr><th>Rank</th><th>XP</th><th>Breadth requirement</th></tr>'+RANKS.map((r,i)=>`<tr><td><b style="color:${r.c}">${i+1} · ${r.n}</b></td><td>${r.xp}</td><td>${r.rule||'Start here'}</td></tr>`).join('');
 </script>
+<script src="world.js"></script>
 <script src="campus.js"></script>
 </body>
 </html>
