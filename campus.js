@@ -1,27 +1,26 @@
-// Campus gameplay on top of World (pixel renderer of the real campus from OpenStreetMap).
+// Campus gameplay on top of World (Pokémon-style tile map of the real campus). Positions are tiles; one tile = 4 m.
 // Uses globals from index.html: S, commit, openQuest, QUESTS, CAPS, lvl, rank, RANKS, toast, selectTab, DOMAINS, esc.
 window.Campus = (() => {
 const RELAY = 'wss://aspire-quest-relay.josephpeterhoffmann.workers.dev/room/';
 const $ = s => document.querySelector(s);
 const stage = $('#stage'), cv = $('#map'), ctx = cv.getContext('2d'), tbox = $('#tbox'), net = $('#netStatus'), miniCv = $('#mini');
-const ZOOMS = [.5, 1, 2, 3];
-let zi = 1; try { zi = +localStorage.getItem('aq-zoom') || 1; } catch (e) {}
+let zo = 0; try { zo = +localStorage.getItem('aq-zoom2') || 0; } catch (e) {}
 let vw = 0, vh = 0, dpr = 1, last = performance.now(), camera = null;
 
 /* ---------- NPCs at real entrances ---------- */
 const NPCS = [
-  { id: 'captain', n: 'Open Day Captain', a: 'quad', dx: -6, dy: 2, q: ['openday'], at: 'the Quadrangle', say: 'Welcome to the Quad! On Open Day this courtyard is packed. Want to help future students find their way?' },
+  { id: 'captain', n: 'Open Day Captain', a: 'quad', dx: -2, dy: 1, q: ['openday'], at: 'the Quadrangle', say: 'Welcome to the Quad! On Open Day this courtyard is packed. Want to help future students find their way?' },
   { id: 'welcome', n: 'Welcome Crew', a: 'frontlawn', dx: 0, dy: 0, q: ['welcome'], at: 'the Front Lawn', say: 'Welcome Week stalls line the Front Lawn. Grab a tote bag and meet your cohort!' },
-  { id: 'cafe', n: 'Café Manager', a: 'holme', dx: 0, dy: 0, q: ['job'], at: 'Holme Building', say: 'Juggling shifts and study? That experience counts. Tell me what you learned on the job.' },
-  { id: 'librarian', n: 'Librarian', a: 'fisher', dx: 0, dy: 0, q: ['study', 'ai'], at: 'Fisher Library', say: 'Shh! Study groups meet on Level 2, and the responsible AI workshop is in the training room.' },
-  { id: 'society', n: 'Society Rep', a: 'manning', dx: 0, dy: 0, q: ['club', 'care'], at: 'Manning House', say: 'Clubs, societies and volunteering all run out of Manning. Want to get involved?' },
-  { id: 'hub', n: 'Innovation Hub', a: 'wentworth', dx: 0, dy: 0, q: ['hack'], at: 'Wentworth Building', say: 'Hackathon this weekend! Bring an idea, leave with a prototype.' },
-  { id: 'mentor', n: 'Mentor Matcher', a: 'jfr', dx: 0, dy: 0, q: ['mentee', 'mentor'], at: 'Jane Foss Russell', say: 'Looking for a mentor, or ready to become one? I can match you.' },
-  { id: 'careers', n: 'Careers Adviser', a: 'abercrombie', dx: 0, dy: 0, q: ['industry', 'wil'], at: 'the Business School', say: 'Employer panels every Wednesday, and placement applications are open.' },
-  { id: 'coach', n: 'Case Comp Coach', a: 'abercrombie', dx: 3, dy: 0, q: ['casecomp'], at: 'the Business School', say: 'Case comp season! Teams of four, 48 hours, real client brief.' },
-  { id: 'lead', n: 'Leadership Lead', a: 'abercrombie', dx: -3, dy: 0, q: ['leadws'], at: 'the Business School', say: 'Leadership isn’t a title. Come to Thursday’s workshop.' },
-  { id: 'well', n: 'Wellbeing Coach', a: 'cpc', dx: 0, dy: 0, q: [], at: 'Charles Perkins Centre', say: 'Feeling drained after a tough challenge? Take a breath. Your energy is fully restored.', heal: true },
-  { id: 'ranger', n: 'Park Ranger', a: 'vicpark', dx: -18, dy: 10, q: [], at: 'Victoria Park', say: 'Careful in the long grass. Challenges like the Deadline Dragon lurk there! Your capabilities are your moves. HEAD, HEART and HANDS capabilities each beat different challenges.' },
+  { id: 'cafe', n: 'Café Manager', b: 'Holme Building', dx: 1, dy: 0, q: ['job'], at: 'Holme Building', say: 'Juggling shifts and study? That experience counts. Tell me what you learned on the job.' },
+  { id: 'librarian', n: 'Librarian', b: 'Fisher Library', dx: 1, dy: 0, q: ['study', 'ai'], at: 'Fisher Library', say: 'Shh! Study groups meet on Level 2, and the responsible AI workshop is in the training room.' },
+  { id: 'society', n: 'Society Rep', b: 'Manning House', dx: 1, dy: 0, q: ['club', 'care'], at: 'Manning House', say: 'Clubs, societies and volunteering all run out of Manning. Want to get involved?' },
+  { id: 'hub', n: 'Innovation Hub', b: 'Wentworth Building', dx: 1, dy: 0, q: ['hack'], at: 'Wentworth Building', say: 'Hackathon this weekend! Bring an idea, leave with a prototype.' },
+  { id: 'mentor', n: 'Mentor Matcher', b: 'Jane Foss Russell Building', dx: 1, dy: 0, q: ['mentee', 'mentor'], at: 'Jane Foss Russell', say: 'Looking for a mentor, or ready to become one? I can match you.' },
+  { id: 'careers', n: 'Careers Adviser', b: 'H70 Abercrombie Building', dx: 1, dy: 0, q: ['industry', 'wil'], at: 'the Business School', say: 'Employer panels every Wednesday, and placement applications are open.' },
+  { id: 'coach', n: 'Case Comp Coach', b: 'H70 Abercrombie Building', dx: 3, dy: 1, q: ['casecomp'], at: 'the Business School', say: 'Case comp season! Teams of four, 48 hours, real client brief.' },
+  { id: 'lead', n: 'Leadership Lead', b: 'H70 Abercrombie Building', dx: -2, dy: 1, q: ['leadws'], at: 'the Business School', say: 'Leadership isn’t a title. Come to Thursday’s workshop.' },
+  { id: 'well', n: 'Wellbeing Coach', b: 'Charles Perkins Centre', dx: 1, dy: 0, q: [], at: 'Charles Perkins Centre', say: 'Feeling drained after a tough challenge? Take a breath. Your energy is fully restored.', heal: true },
+  { id: 'ranger', n: 'Park Ranger', a: 'vicpark', dx: -4, dy: 2, q: [], at: 'Victoria Park', say: 'Careful in the long grass. Challenges like the Deadline Dragon lurk there! Your capabilities are your moves. HEAD, HEART and HANDS capabilities each beat different challenges.' },
 ];
 
 /* ---------- challenges ---------- */
@@ -36,11 +35,11 @@ const FOES = [
 const DAILY_BATTLE_XP = 75, WIN_XP = 15;
 
 /* ---------- state ---------- */
-const me = { x: 0, y: 0, dir: 'd', frame: 0, dist: 0, moving: false, energy: 100, grass: 0, bike: false };
+const me = { x: 0, y: 0, px: 0, py: 0, fx: 0, fy: 0, tx: 0, ty: 0, t: 0, dir: 'd', frame: 0, stepN: 0, moving: false, turnUntil: 0, energy: 100, bike: false };
 const maxE = () => can('stamina') ? 130 : 100;
 let LANDMARKS = [];
 const others = new Map();
-let ws = null, myId = null, room = '', retry = 2000, target = null, battle = null, busy = false, lastSend = 0, sentStill = true;
+let ws = null, myId = null, room = '', retry = 2000, target = null, battle = null, busy = false;
 const keys = new Set(); let running = false;
 const myLook = () => { const L = World.lookFor(World.seedOf(S.name), S.color); if (can('style') && S.style != null) { L.style = S.style; L.hat = S.hat || L.hat; } return L; };
 
@@ -50,8 +49,9 @@ function resize() {
   vw = r.width; vh = r.height; cv.width = Math.round(vw * dpr); cv.height = Math.round(vh * dpr);
 }
 window.addEventListener('resize', resize);
-const zoom = () => ZOOMS[zi];
-function setZoom(d) { zi = Math.max(0, Math.min(ZOOMS.length - 1, zi + d)); try { localStorage.setItem('aq-zoom', zi); } catch (e) {} $('#zoomTxt').textContent = ZOOMS[zi] + '×'; }
+const baseZ = () => Math.max(1, Math.round((vw || 960) / (16 * 20)));      // about 20 tiles across, like a DS screen
+const zoom = () => Math.max(1, Math.min(6, baseZ() + zo));
+function setZoom(d) { zo = Math.max(1 - baseZ(), Math.min(6 - baseZ(), zo + d)); try { localStorage.setItem('aq-zoom2', zo); } catch (e) {} $('#zoomTxt').textContent = zoom() + '×'; }
 $('#zoomIn').addEventListener('click', () => setZoom(1));
 $('#zoomOut').addEventListener('click', () => setZoom(-1));
 stage.addEventListener('wheel', e => { e.preventDefault(); setZoom(e.deltaY < 0 ? 1 : -1); }, { passive: false });
@@ -67,52 +67,52 @@ const npcHasNew = n => n.q.some(id => !S.q[id]);
 function actors(t) {
   const L = myLook();
   return [...npcActors(t),
-    ...[...others.values()].map(p => ({ x: p.px, y: p.py, dir: p.dir || 'd', frame: p.moving ? walkFrame(p.dist || 0) : 0, look: p.look, lookKey: 'p' + p.name + p.color, tall: World.isTall(p.px, p.py) })),
+    ...[...others.values()].map(p => ({ x: p.px, y: p.py, dir: p.dir || 'd', frame: p.moving ? (Math.floor(t / 130) % 2 ? 1 : 2) : 0, look: p.look, lookKey: 'p' + p.name + p.color, tall: World.isTall(Math.round(p.px), Math.round(p.py)) })),
     ...(can('explorer') ? LANDMARKS.filter(l => !(S.landmarks || {})[l.n]).map(l => ({ x: l.x, y: l.y, star: true })) : []),
-    { x: me.x, y: me.y, dir: me.dir, frame: me.frame, look: L, lookKey: 'me' + S.name + S.color + (L.style ?? '') + (L.hat || ''), tall: World.isTall(me.x, me.y), bike: me.bike, swim: World.isWater(me.x, me.y) }];
+    { x: me.px, y: me.py, dir: me.dir, frame: me.frame, look: L, lookKey: 'me' + S.name + S.color + (L.style ?? '') + (L.hat || ''), tall: World.isTall(me.x, me.y), bike: me.bike, swim: World.isWater(me.x, me.y) }];
 }
-const walkFrame = d => [1, 0, 2, 0][Math.floor(d / .55) % 4];
 
 /* ---------- loop ---------- */
 const DIRV = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] };
 const KEYMAP = { ArrowUp: 'u', ArrowDown: 'd', ArrowLeft: 'l', ArrowRight: 'r', w: 'u', s: 'd', a: 'l', d: 'r', W: 'u', S: 'd', A: 'l', D: 'r' };
 const active = () => !$('#campus').hidden && !busy && !battle && !document.querySelector('dialog[open]') && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName);
+const speed = () => me.bike ? 11 : running && can('run') ? 7.5 : 4;   // tiles per second
 function step(dt) {
-  let vx = 0, vy = 0;
-  if (active()) for (const k of keys) { vx += DIRV[k][0]; vy += DIRV[k][1]; }
-  const L = Math.hypot(vx, vy);
-  me.moving = L > 0;
-  if (!me.moving) { me.frame = 0; return; }
-  vx /= L; vy /= L;
-  me.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'l' : 'r') : (vy < 0 ? 'u' : 'd');
-  if (me.bike && World.isWater(me.x, me.y)) me.bike = false;
-  const sp = (me.bike ? 11 : running && can('run') ? 7.5 : 4.2) * dt / 1000;
-  const nx = me.x + vx * sp, ny = me.y + vy * sp;
-  const free = (x, y) => World.walkable(x, y, .35, can('surf')) && !NPCS.some(n => Math.hypot(n.x - x, n.y - y) < .9);
-  let moved = 0;
-  if (free(nx, me.y)) { me.x = nx; moved += Math.abs(vx * sp); }
-  if (free(me.x, ny)) { me.y = ny; moved += Math.abs(vy * sp); }
-  me.dist += moved; me.frame = moved ? walkFrame(me.dist) : 0;
-  if (moved && can('regen') && me.energy < maxE()) me.energy = Math.min(maxE(), me.energy + moved * .5);
-  for (const l of LANDMARKS) if (can('explorer') && !(S.landmarks || {})[l.n] && Math.hypot(l.x - me.x, l.y - me.y) < 6) { commit(() => { S.landmarks = S.landmarks || {}; S.landmarks[l.n] = 1; S.xp += 10; }); toast(`⭐ Landmark discovered: ${l.n} (+10 XP)`); }
-  if (moved && !me.bike && World.isTall(me.x, me.y) && me.energy > 0) { me.grass += moved; if (me.grass > 3) { me.grass = 0; if (Math.random() < .13) startBattle(); } }
-  if (target && Math.hypot(target.x - me.x, target.y - me.y) < 2.5) target = null;
-  const now = performance.now();
-  if (now - lastSend > 100) { lastSend = now; sentStill = false; send({ t: 'mv', x: Math.round(me.x * 10), y: Math.round(me.y * 10), d: me.dir }); S.pos2 = { x: me.x, y: me.y }; saveSoon(); }
+  if (me.moving) {
+    me.t += dt / 1000 * speed();
+    if (me.t < 1) { me.px = me.fx + (me.tx - me.fx) * me.t; me.py = me.fy + (me.ty - me.fy) * me.t; me.frame = me.t < .5 ? (me.stepN & 1 ? 1 : 2) : 0; return; }
+    arrive();
+  }
+  me.frame = 0;
+  if (!active()) return;
+  const k = [...keys].pop(); if (!k) return;
+  if (me.dir !== k) { me.dir = k; me.turnUntil = performance.now() + 90; return; }   // tap to turn on the spot, like Pokémon
+  if (performance.now() < me.turnUntil) return;
+  const nx = me.x + DIRV[k][0], ny = me.y + DIRV[k][1];
+  if (!World.walkable(nx, ny, can('surf')) || NPCS.some(n => n.x === nx && n.y === ny)) return;
+  if (me.bike && World.isWater(nx, ny)) me.bike = false;
+  Object.assign(me, { moving: true, t: 0, fx: me.x, fy: me.y, tx: nx, ty: ny }); me.stepN++;
+  send({ t: 'mv', x: nx, y: ny, d: me.dir });
+}
+function arrive() {
+  Object.assign(me, { x: me.tx, y: me.ty, px: me.tx, py: me.ty, moving: false });
+  S.pos3 = { x: me.x, y: me.y }; saveSoon();
+  if (can('regen') && me.energy < maxE()) me.energy = Math.min(maxE(), me.energy + 2);
+  for (const l of LANDMARKS) if (can('explorer') && !(S.landmarks || {})[l.n] && Math.abs(l.x - me.x) + Math.abs(l.y - me.y) <= 2) { commit(() => { S.landmarks = S.landmarks || {}; S.landmarks[l.n] = 1; S.xp += 10; }); toast(`⭐ Landmark discovered: ${l.n} (+10 XP)`); }
+  if (target && Math.abs(target.x - me.x) + Math.abs(target.y - me.y) <= 2) target = null;
+  if (!me.bike && World.isTall(me.x, me.y) && me.energy > 0 && Math.random() < .1) startBattle();
 }
 function loop(t) {
   const dt = Math.min(50, t - last); last = t;
   if (!$('#campus').hidden && World.ready) {
     if (vw === 0) resize();
     step(dt);
-    if (!me.moving && !sentStill) { sentStill = true; send({ t: 'mv', x: Math.round(me.x * 10), y: Math.round(me.y * 10), d: me.dir }); }
     for (const p of others.values()) {
-      const dx = p.x - p.px, dy = p.y - p.py, d = Math.hypot(dx, dy); p.moving = d > .05;
-      if (d > 30) { p.px = p.x; p.py = p.y; } else { const k = Math.min(1, dt / 110); p.px += dx * k; p.py += dy * k; p.dist = (p.dist || 0) + d * k; }
+      const dx = p.x - p.px, dy = p.y - p.py, d = Math.hypot(dx, dy); p.moving = d > .02;
+      if (d > 6) { p.px = p.x; p.py = p.y; } else if (d > 0) { const k = Math.min(d, dt / 1000 * 9); p.px += dx / d * k; p.py += dy / d * k; }
     }
-    // camera eases toward the player
-    if (!camera) camera = { x: me.x, y: me.y };
-    camera.x += (me.x - camera.x) * Math.min(1, dt / 120); camera.y += (me.y - 1.2 - camera.y) * Math.min(1, dt / 120);
+    camera = { x: me.px, y: me.py + .3 };                              // camera locked to the player, Pokémon style
+    $('#zoomTxt').textContent = zoom() + '×';
     const view = { cx: camera.x, cy: camera.y, z: zoom(), dpr, vw, vh };
     const cam = World.draw(ctx, view, actors(t), t);
     World.work(me.moving ? 6 : 12);
@@ -126,19 +126,20 @@ function loop(t) {
 /* ---------- screen-space overlay: labels, name tags, bubbles, arrow ---------- */
 let LABELS = null;
 function overlay(cam, t) {
-  const z = zoom(), PPM = World.PPM;
+  const z = zoom(), TS = World.TS;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const sx = mx => (mx * PPM - cam.camX) * z, sy = my => (my * PPM - cam.camY) * z;
+  const px = x => (x * TS - cam.camX) * z, py = y => (y * TS - cam.camY) * z;   // tile edges
+  const sx = x => px(x + .5), sy = y => py(y + 1);                                // actor centre / feet
   LABELS = LABELS || World.labels();
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   for (const l of LABELS) {
-    if (!l.big && z < 2) continue;
-    const x = sx(l.x), y = sy(l.y) - 6; if (x < -100 || x > vw + 100 || y < -20 || y > vh + 20) continue;
+    if (!l.big && z < 3) continue;
+    const x = px(l.x), y = py(l.y) - 8; if (x < -100 || x > vw + 100 || y < -20 || y > vh + 20) continue;
     ctx.font = `${l.park ? 'italic ' : ''}600 ${l.big ? 15 : 13}px "Pixelify Sans", monospace`;
     ctx.strokeStyle = 'rgba(16,14,34,.9)'; ctx.lineWidth = 4; ctx.strokeText(l.t, x, y); ctx.fillStyle = l.park ? '#e9ffd8' : '#fff7e0'; ctx.fillText(l.t, x, y);
   }
   ctx.font = '600 12px "Pixelify Sans", monospace';
-  const tagY = my => sy(my) - 27 * z - 4;
+  const tagY = my => sy(my) - 25 * z - 6;
   for (const p of others.values()) {
     const x = sx(p.px), y = tagY(p.py); if (x < -50 || x > vw + 50 || y < -40 || y > vh + 40) continue;
     pill(p.name || '…', x, y, 'rgba(20,16,40,.78)', '#fff');
@@ -146,7 +147,7 @@ function overlay(cam, t) {
   }
   pill(S.name, sx(me.x), tagY(me.y), 'rgba(91,61,245,.92)', '#fff');
   if (me.say && me.sayT > t) bubble(me.say, sx(me.x), tagY(me.y) - 16);
-  if (z >= 1) for (const n of NPCS) { const x = sx(n.x), y = tagY(n.y) - (npcHasNew(n) || target === n ? 12 * z : 0); if (x > -50 && x < vw + 50 && y > -30 && y < vh + 30) pill(n.n, x, y, 'rgba(255,253,245,.92)', '#1b1830'); }
+  for (const n of NPCS) { const x = sx(n.x), y = tagY(n.y) - (npcHasNew(n) || target === n ? 12 * z : 0); if (x > -50 && x < vw + 50 && y > -30 && y < vh + 30) pill(n.n, x, y, 'rgba(255,253,245,.92)', '#1b1830'); }
   // interact hint
   const f = facingThing(); $('#hint').textContent = f ? `Space / A: ${f.p ? 'meet ' + f.p.name : 'talk to ' + f.n.n}` : '';
   // off-screen waypoint arrow
@@ -156,7 +157,7 @@ function overlay(cam, t) {
       const ang = Math.atan2(Y - vh / 2, X - vw / 2), r = Math.min(vw, vh) / 2 - 34, ax = vw / 2 + Math.cos(ang) * r, ay = vh / 2 + Math.sin(ang) * r;
       ctx.save(); ctx.translate(ax, ay); ctx.rotate(ang); ctx.fillStyle = '#ff5a7a'; ctx.strokeStyle = '#1b1830'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(-10, -12); ctx.lineTo(-10, 12); ctx.closePath(); ctx.stroke(); ctx.fill(); ctx.restore();
-      const dist = Math.round(Math.hypot(target.x - me.x, target.y - me.y));
+      const dist = Math.round(Math.hypot(target.x - me.x, target.y - me.y) * 4);
       pill(`${target.n} · ${dist} m`, ax, ay + 24, 'rgba(255,90,122,.95)', '#fff');
     }
   }
@@ -177,18 +178,18 @@ function drawMini() {
   const g = miniCv.getContext('2d'), m = World.mini, MS = World.MS;
   if (miniCv.width !== m.width) { miniCv.width = m.width; miniCv.height = m.height; }
   g.drawImage(m, 0, 0);
-  const dot = (x, y, c, r = 2) => { g.fillStyle = '#1b1830'; g.fillRect(x * MS - r - 1, y * MS - r - 1, r * 2 + 2, r * 2 + 2); g.fillStyle = c; g.fillRect(x * MS - r, y * MS - r, r * 2, r * 2); };
+  const dot = (x, y, c, r = 2) => { x = Math.round(x + .5); y = Math.round(y + .5); g.fillStyle = '#1b1830'; g.fillRect(x - r - 1, y - r - 1, r * 2 + 2, r * 2 + 2); g.fillStyle = c; g.fillRect(x - r, y - r, r * 2, r * 2); };
   for (const n of NPCS) dot(n.x, n.y, npcHasNew(n) ? '#ffd84a' : '#ffffff', 1.5);
   for (const p of others.values()) if (can('app') || (S.friends && S.friends[p.name])) dot(p.px, p.py, p.color || '#888', 2);
   if (can('explorer')) for (const l of LANDMARKS) if (!(S.landmarks || {})[l.n]) dot(l.x, l.y, '#ffe14d', 1.5);
   if (target) dot(target.x, target.y, '#ff5a7a', 3);
-  dot(me.x, me.y, S.color || '#5b3df5', 3);
-  const z = zoom(), w = vw / z / World.PPM, h = vh / z / World.PPM;
+  dot(me.px, me.py, S.color || '#5b3df5', 3);
+  const z = zoom(), w = vw / z / World.TS, h = vh / z / World.TS;
   g.strokeStyle = '#ffffff'; g.lineWidth = 1; g.strokeRect((camera.x - w / 2) * MS, (camera.y - h / 2) * MS, w * MS, h * MS);
 }
 miniCv.addEventListener('click', e => { // tap the minimap to set a waypoint at the nearest quest-giver
   const r = miniCv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * World.size[0], y = (e.clientY - r.top) / r.height * World.size[1];
-  if (can('fly')) { [me.x, me.y] = World.nearestFree(x, y); camera = null; toast('🦅 You flew across campus'); return; }
+  if (can('fly')) { teleport(...World.nearestFree(x, y)); toast('🦅 You flew across campus'); return; }
   if (!can('waypoint')) return toast('🔒 Waypoints unlock at Problem Solving & Data Level 2');
   const n = NPCS.reduce((a, b) => Math.hypot(a.x - x, a.y - y) < Math.hypot(b.x - x, b.y - y) ? a : b);
   target = n; toast(`📍 Waypoint: ${n.n} at ${n.at}`);
@@ -196,18 +197,17 @@ miniCv.addEventListener('click', e => { // tap the minimap to set a waypoint at 
 
 /* ---------- interaction ---------- */
 function facingThing() {
-  if (!World.ready) return null;
-  const [fx, fy] = DIRV[me.dir], near = (x, y) => { const dx = x - me.x, dy = y - me.y, d = Math.hypot(dx, dy); return d < 2.4 && (d < 1.3 || (dx * fx + dy * fy) / d > .3) ? d : 1e9; };
-  let best = null, bd = 1e9;
-  for (const n of NPCS) { const d = near(n.x, n.y); if (d < bd) { bd = d; best = { n }; } }
-  for (const p of others.values()) { const d = near(p.px, p.py); if (d < bd) { bd = d; best = { p }; } }
-  return best;
+  if (!World.ready || me.moving) return null;
+  const fx = me.x + DIRV[me.dir][0], fy = me.y + DIRV[me.dir][1];
+  const n = NPCS.find(n => n.x === fx && n.y === fy); if (n) return { n };
+  const p = [...others.values()].find(p => Math.round(p.px) === fx && Math.round(p.py) === fy); return p ? { p } : null;
 }
+const teleport = (x, y) => Object.assign(me, { x, y, px: x, py: y, moving: false });
 function interact() {
   if (!tbox.hidden) return closeBox();
   if (!active()) return;
   const f = facingThing(); if (!f) return;
-  if (f.n) { const n = f.n, dx = me.x - n.x, dy = me.y - n.y; n.face = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'l' : 'r') : (dy < 0 ? 'u' : 'd'); talk(n); }
+  if (f.n) { f.n.face = { u: 'd', d: 'u', l: 'r', r: 'l' }[me.dir]; talk(f.n); }
   else meet(f.p);
 }
 function box(title, html, buttons = []) {
@@ -247,7 +247,7 @@ function moves() {
   return ms.length ? ms : [{ n: 'Wing it', d: null, l: 0, pow: 14 }];
 }
 const pixelEmoji = e => { const c = document.createElement('canvas'); c.width = c.height = 28; const g = c.getContext('2d'); g.font = '22px serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 14, 15); return c.toDataURL(); };
-const rallied = () => can('rally') && [...others.values()].some(p => S.friends && S.friends[p.name] && Math.hypot(p.px - me.x, p.py - me.y) < 20);
+const rallied = () => can('rally') && [...others.values()].some(p => S.friends && S.friends[p.name] && Math.hypot(p.px - me.x, p.py - me.y) <= 5);
 function startBattle() {
   const f = FOES[Math.random() * FOES.length | 0];
   keys.clear(); battle = { shield: can('shield'), f, hp: f.hp, msg: `A wild <b>${f.n}</b> appeared!`, lock: true, img: pixelEmoji(f.e) };
@@ -304,7 +304,7 @@ function win(m) {
 /* ---------- multiplayer ---------- */
 function send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); }
 function myInfo() { const top = CAPS.filter(c => lvl(c.id) > 0).sort((a, b) => lvl(b.id) - lvl(a.id))[0];
-  return { name: S.name, color: S.color || '#5b3df5', xp: S.xp, rank: rank(), x: Math.round(me.x * 10), y: Math.round(me.y * 10), d: me.dir, top: top ? `${top.n} L${lvl(top.id)}` : '' }; }
+  return { name: S.name, color: S.color || '#5b3df5', xp: S.xp, rank: rank(), x: me.x, y: me.y, d: me.dir, top: top ? `${top.n} L${lvl(top.id)}` : '' }; }
 function setNet() { const n = others.size + 1;
   net.innerHTML = ws && ws.readyState === 1 ? `<span class="dot on"></span>${n} on campus in <b>${esc(room)}</b>` : `<span class="dot"></span>Connecting to <b>${esc(room)}</b>…`; }
 function connect() {
@@ -318,14 +318,14 @@ function connect() {
     const now = performance.now();
     if (m.t === 'init') { myId = m.you; m.players.forEach(up); }
     else if (m.t === 'up') { const isNew = !others.has(m.p.id); up(m.p); if (isNew) toast(`👋 ${m.p.name} arrived on campus`); }
-    else if (m.t === 'mv') { const p = others.get(m.id); if (p) { p.x = m.x / 10; p.y = m.y / 10; p.dir = m.d; } }
+    else if (m.t === 'mv') { const p = others.get(m.id); if (p) { p.x = m.x; p.y = m.y; p.dir = m.d; } }
     else if (m.t === 'leave') others.delete(m.id);
     else if (m.t === 'chat' || m.t === 'emote') {
       const txt = m.t === 'chat' ? m.m : m.e, p = m.id === myId ? me : others.get(m.id);
       if (p) { p.say = txt; p.sayT = now + 6000; }
       if (m.t === 'chat') logChat(m.id === myId ? S.name : (others.get(m.id)?.name || '?'), m.m);
       if (m.t === 'chat' && m.m.startsWith('📣') && m.id !== myId) toast(`${others.get(m.id)?.name || '?'}: ${m.m}`);
-      if (m.t === 'emote' && (m.e === '🤗' || m.e === '💞') && m.id !== myId && p && Math.hypot(p.px - me.x, p.py - me.y) < 8) { const h = m.e === '💞' ? 50 : 25; me.energy = Math.min(maxE(), me.energy + h); toast(`${p.name} cheered you up: +${h} energy`); }
+      if (m.t === 'emote' && (m.e === '🤗' || m.e === '💞') && m.id !== myId && p && Math.hypot(p.px - me.x, p.py - me.y) <= 3) { const h = m.e === '💞' ? 50 : 25; me.energy = Math.min(maxE(), me.energy + h); toast(`${p.name} cheered you up: +${h} energy`); }
     }
     else if (m.t === 'invite') box('Squad invite', `<b>${esc(m.name)}</b> wants to squad up. Squad members see each other's progress and earn a bonus for doing quests together.`,
       [{ label: '🤝 Accept', primary: true, fn: () => { send({ t: 'accept', to: m.from }); addFriend(m.name, m.xp, m.rank); toast(`${m.name} joined your squad`); } }]);
@@ -334,7 +334,7 @@ function connect() {
   };
 }
 function up(p) {
-  const o = others.get(p.id), x = (p.x ?? 0) / 10, y = (p.y ?? 0) / 10;
+  const o = others.get(p.id), x = p.x ?? 0, y = p.y ?? 0;
   others.set(p.id, Object.assign(o || { px: x, py: y }, p, { x, y, dir: p.d || o?.dir, look: World.lookFor(World.seedOf(p.name), p.color) }));
   if (S.friends && S.friends[p.name]) { S.friends[p.name] = { xp: p.xp || 0, rank: p.rank || 0 }; saveSoon(); }
 }
@@ -351,7 +351,7 @@ function fastTravel() {
   if (!can('travel')) return toast('🔒 Fast Travel unlocks at Digital Acumen Level 2');
   const met = NPCS.filter(n => (S.met || {})[n.id]);
   if (!met.length) return box('Campus shuttle', 'Talk to quest-givers first. The shuttle only goes to people you have met.');
-  box('🚌 Campus shuttle', 'Where to?', met.map(n => ({ label: `${n.n} · ${n.at}`, fn: () => { [me.x, me.y] = World.nearestFree(n.x, n.y + 2); camera = null; toast(`🚌 Arrived at ${n.at}`); } })));
+  box('🚌 Campus shuttle', 'Where to?', met.map(n => ({ label: `${n.n} · ${n.at}`, fn: () => { teleport(...World.nearestFree(n.x, n.y + 1)); toast(`🚌 Arrived at ${n.at}`); } })));
 }
 function renderAbil() {
   const el = $('#abilbar'); if (!el) return;
@@ -426,12 +426,15 @@ $('#profileBtn').addEventListener('click', setup);
 /* ---------- boot ---------- */
 World.load('map.json').then(() => {
   const A = World.anchors;
-  for (const n of NPCS) { const a = A[n.a] || A.quad; [n.x, n.y] = World.nearestFree(a[0] + n.dx, a[1] + n.dy); n.look = World.lookFor(World.seedOf(n.id) + 3); }
-  const p = S.pos2 && World.walkable(S.pos2.x, S.pos2.y) ? [S.pos2.x, S.pos2.y] : World.nearestFree(A.quad[0], A.quad[1] + 4);
-  [me.x, me.y] = p;
+  const occ = new Set(), place = (x, y) => { x = Math.round(x); y = Math.round(y);
+    for (let r = 0; r < 20; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+      const X = x + dx, Y = y + dy; if (World.walkable(X, Y) && !occ.has(X + ',' + Y)) { occ.add(X + ',' + Y); return [X, Y]; } } return [x, y]; };
+  for (const n of NPCS) { const a = (n.b && World.door(n.b)) || A[n.a] || A.quad; [n.x, n.y] = place(a[0] + n.dx, a[1] + n.dy); n.look = World.lookFor(World.seedOf(n.id) + 3); }
+  const p = S.pos3 && World.walkable(S.pos3.x, S.pos3.y) ? [S.pos3.x, S.pos3.y] : World.nearestFree(A.quad[0], A.quad[1] + 2);
+  teleport(...p);
   LANDMARKS = ['Great Hall', 'Fisher Library', 'Chau Chak Wing Museum', 'Anderson-Stuart Building', 'Charles Perkins Centre', 'Lake Northam', 'Victoria Park', 'The Front Lawn', 'Madsen Building']
     .map(n => { const p = World.find(n); return p && { n, x: p[0], y: p[1] }; }).filter(Boolean)
-    .map(l => { const [x, y] = World.nearestFree(l.x, l.y); return { ...l, x, y }; });
+
   if (!can('map')) miniCv.hidden = true;
   renderAbil(); setZoom(0); renderQuestsIfShown();
 }).catch(err => { $('#loading').textContent = 'Could not load the campus map: ' + err.message; });
@@ -443,7 +446,7 @@ return {
   pos: () => [me.x, me.y, me.bike],
   sync() { send({ t: 'me', ...myInfo() }); renderAbil(); if (!can('map')) miniCv.hidden = true; },
   shown() { resize(); if (!S.joined) setup(); stage.focus(); },
-  nearby() { const r = can('teamspirit') ? 30 : 12; return [...others.values()].filter(p => Math.hypot(p.px - me.x, p.py - me.y) <= r).map(p => p.name); },
+  nearby() { const r = can('teamspirit') ? 8 : 3; return [...others.values()].filter(p => Math.hypot(p.px - me.x, p.py - me.y) <= r).map(p => p.name); },
   online(name) { return [...others.values()].some(p => p.name === name); },
   goto(qid) { const n = NPCS.find(n => n.q.includes(qid)); if (!n) return; target = n; selectTab('campus'); toast(`📍 Head to the ${n.n} at ${n.at}`); },
   where(qid) { const n = NPCS.find(n => n.q.includes(qid)); return n ? n.at : ''; },
