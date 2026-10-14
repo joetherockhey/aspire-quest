@@ -200,8 +200,72 @@ async function load(url) {
   for (const b of blds) b.tiles = b.tiles.filter(i => bid[i] === b.id);
   labelsRaw = raw.labels.map(([t, x, y]) => [t, x * s - ox, y * s - oy]);
   for (const [k, [x, y]] of Object.entries(raw.anchors)) anchorsM[k] = [x * s - ox, y * s - oy];
+  connect();
   blds.forEach(prepBuilding);
   buildMini(); ready = true;
+}
+
+/* ---------- connectivity: no walkable pocket may be cut off from the main campus ---------- */
+let comp = null, mainComp = 0;
+const freeTile = i => bid[i] < 0 && !treeAt[i] && !WET.has(mat[i]);
+function label() {
+  comp = new Int32Array(W * H).fill(-1); const sizes = []; const st = [];
+  for (let i = 0; i < W * H; i++) {
+    if (comp[i] >= 0 || !freeTile(i)) continue;
+    const id = sizes.length; let n = 0; comp[i] = id; st.push(i);
+    while (st.length) { const k = st.pop(); n++; const x = k % W, y = k / W | 0;
+      for (const j of [x > 0 ? k - 1 : -1, x < W - 1 ? k + 1 : -1, y > 0 ? k - W : -1, y < H - 1 ? k + W : -1])
+        if (j >= 0 && comp[j] < 0 && freeTile(j)) { comp[j] = id; st.push(j); } }
+    sizes.push(n);
+  }
+  mainComp = sizes.indexOf(Math.max(...sizes));
+  return sizes;
+}
+// pockets of 12+ tiles (courtyards, lanes between buildings) get the cheapest passage to the main campus:
+// through a building wall (becomes a paved archway), past a tree (removed) or, as a last resort, over water (bridge)
+function connect() {
+  for (let pass = 0; pass < 6; pass++) {
+    const sizes = label(); let changed = false;
+    for (let c = 0; c < sizes.length; c++) {
+      if (c === mainComp || sizes[c] < 12) continue;
+      const dist = new Float32Array(W * H).fill(Infinity), prev = new Int32Array(W * H).fill(-1), heap = [];
+      const push = (i, d) => { heap.push([d, i]); let k = heap.length - 1; while (k > 0) { const p = (k - 1) >> 1; if (heap[p][0] <= heap[k][0]) break; [heap[p], heap[k]] = [heap[k], heap[p]]; k = p; } };
+      const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let k = 0; for (;;) { const l = 2 * k + 1, r = l + 1; let m = k; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === k) break; [heap[m], heap[k]] = [heap[k], heap[m]]; k = m; } } return top; };
+      for (let i = 0; i < W * H; i++) if (comp[i] === c) { dist[i] = 0; push(i, 0); }
+      let hit = -1;
+      while (heap.length) {
+        const [d, k] = pop(); if (d > dist[k]) continue;
+        if (comp[k] === mainComp) { hit = k; break; }
+        const x = k % W, y = k / W | 0;
+        for (const j of [x > 0 ? k - 1 : -1, x < W - 1 ? k + 1 : -1, y > 0 ? k - W : -1, y < H - 1 ? k + W : -1]) {
+          if (j < 0) continue;
+          const cost = freeTile(j) ? 1 : bid[j] >= 0 ? 4 : treeAt[j] ? 2 : 40;
+          if (d + cost < dist[j]) { dist[j] = d + cost; prev[j] = k; push(j, d + cost); }
+        }
+      }
+      if (hit < 0 || dist[hit] > 160) continue;
+      for (let k = prev[hit]; k >= 0 && comp[k] !== c; k = prev[k]) {
+        if (bid[k] >= 0) { bid[k] = -1; mat[k] = M.PLAZA; }
+        if (treeAt[k]) { treeAt[k] = 0; trees = trees.filter(t => t.ty * W + t.tx !== k); }
+        if (WET.has(mat[k])) mat[k] = M.BRIDGE;
+      }
+      changed = true;
+    }
+    if (!changed) break;
+  }
+  for (const b of blds) b.tiles = b.tiles.filter(i => bid[i] === b.id);
+  label();
+}
+const inMain = (x, y) => x >= 0 && y >= 0 && x < W && y < H && comp[y * W + x] === mainComp;
+// would an NPC standing here split the paths around it? (local flood fill around the tile)
+function isChoke(x, y, blocked = new Set()) {
+  const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [x + dx, y + dy]).filter(([a, b]) => walkable(a, b) && !blocked.has(a + ',' + b));
+  if (nb.length < 2) return false;
+  const seen = new Set([x + ',' + y, nb[0].join(',')]), q = [nb[0]];
+  for (let n = 0; q.length && n < 600; n++) { const [a, b] = q.shift();
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = (a + dx) + ',' + (b + dy);
+      if (!seen.has(k) && walkable(a + dx, b + dy) && !blocked.has(k)) { seen.add(k); q.push([a + dx, b + dy]); } } }
+  return !nb.every(p => seen.has(p.join(',')));
 }
 
 /* ---------- buildings: tile footprint -> front wall + roof, Pokémon style ---------- */
@@ -515,7 +579,8 @@ function walkable(x, y, surf = false) {
   if (!inMap(x, y)) return false; const i = y * W + x;
   return bid[i] < 0 && !treeAt[i] && (!WET.has(mat[i]) || surf);
 }
-function nearestFree(x, y) { x = Math.round(x); y = Math.round(y); for (let r = 0; r < 40; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; if (walkable(x + dx, y + dy)) return [x + dx, y + dy]; } return [x, y]; }
+// every teleport target (spawn, saved spot, fast travel, fly, NPCs) lands on the main campus, never in a cut-off pocket
+function nearestFree(x, y) { x = Math.round(x); y = Math.round(y); for (let r = 0; r < 60; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; if (inMain(x + dx, y + dy)) return [x + dx, y + dy]; } return [x, y]; }
 function door(name) { const b = blds.filter(b => b.name === name).sort((a, b) => (!!b.door - !!a.door) || b.tiles.length - a.tiles.length)[0];
   if (!b) return null; return b.door ? nearestFree(b.door[0], b.door[1] + 1) : nearestFree((b.x0 + b.x1) / 2, b.y1 + 1); }
 function find(name) { const d = door(name); if (d) return d; const l = labelsRaw.find(l => l[0] === name); return l ? nearestFree(l[1], l[2]) : null; }
@@ -531,6 +596,7 @@ function labels() {
 return {
   TS, load, draw, work, walkable, nearestFree, door, find, labels, lookFor, seedOf,
   charSprite: (look, dir, frame) => renderChar(look, dir, frame),
+  inMain, isChoke,
   isTall: (x, y) => inMap(x, y) && mat[y * W + x] === M.TALL,
   isWater: (x, y) => inMap(x, y) && WET.has(mat[y * W + x]),
   get ready() { return ready; }, get anchors() { return anchorsM; }, get size() { return [W, H]; }, get mini() { return mini; }, MS: 1,

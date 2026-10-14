@@ -89,7 +89,7 @@ function step(dt) {
   if (me.dir !== k) { me.dir = k; me.turnUntil = performance.now() + 90; return; }   // tap to turn on the spot, like Pokémon
   if (performance.now() < me.turnUntil) return;
   const nx = me.x + DIRV[k][0], ny = me.y + DIRV[k][1];
-  if (!World.walkable(nx, ny, can('surf')) || NPCS.some(n => n.x === nx && n.y === ny)) return;
+  if (!World.walkable(nx, ny, can('surf') || World.isWater(me.x, me.y)) || NPCS.some(n => n.x === nx && n.y === ny)) return;   // already in the water? you can always swim to shore
   if (me.bike && World.isWater(nx, ny)) me.bike = false;
   Object.assign(me, { moving: true, t: 0, fx: me.x, fy: me.y, tx: nx, ty: ny }); me.stepN++;
   send({ t: 'mv', x: nx, y: ny, d: me.dir });
@@ -428,9 +428,9 @@ World.load('map.json').then(() => {
   const A = World.anchors;
   const occ = new Set(), place = (x, y) => { x = Math.round(x); y = Math.round(y);
     for (let r = 0; r < 20; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
-      const X = x + dx, Y = y + dy; if (World.walkable(X, Y) && !occ.has(X + ',' + Y)) { occ.add(X + ',' + Y); return [X, Y]; } } return [x, y]; };
+      const X = x + dx, Y = y + dy; if (World.inMain(X, Y) && !occ.has(X + ',' + Y) && !World.isChoke(X, Y, occ)) { occ.add(X + ',' + Y); return [X, Y]; } } return World.nearestFree(x, y); };
   for (const n of NPCS) { const a = (n.b && World.door(n.b)) || A[n.a] || A.quad; [n.x, n.y] = place(a[0] + n.dx, a[1] + n.dy); n.look = World.lookFor(World.seedOf(n.id) + 3); }
-  const p = S.pos3 && World.walkable(S.pos3.x, S.pos3.y) ? [S.pos3.x, S.pos3.y] : World.nearestFree(A.quad[0], A.quad[1] + 2);
+  const p = S.pos3 && World.inMain(S.pos3.x, S.pos3.y) && !occ.has(S.pos3.x + ',' + S.pos3.y) ? [S.pos3.x, S.pos3.y] : World.nearestFree(A.quad[0], A.quad[1] + 2);
   teleport(...p);
   LANDMARKS = ['Great Hall', 'Fisher Library', 'Chau Chak Wing Museum', 'Anderson-Stuart Building', 'Charles Perkins Centre', 'Lake Northam', 'Victoria Park', 'The Front Lawn', 'Madsen Building']
     .map(n => { const p = World.find(n); return p && { n, x: p[0], y: p[1] }; }).filter(Boolean)
