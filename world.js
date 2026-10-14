@@ -340,10 +340,15 @@ function renderChar(look, dir, frame) {
   if (!side) { const lu = frame === 1 ? 1 : 0, ru = frame === 2 ? 1 : 0;
     rect(5, 18, 6, 21 - lu, pa); rect(9, 18, 10, 21 - ru, paS); rect(5, 21 - lu, 6, 22 - lu, so); rect(9, 21 - ru, 10, 22 - ru, so); }
   else if (frame === 0) { rect(6, 18, 9, 20, pa); rect(9, 18, 9, 20, paS); rect(6, 21, 9, 22, so); }
-  else { const f = frame === 1; rect(f ? 4 : 9, 18, f ? 5 : 10, 21, paS); rect(f ? 9 : 4, 18, f ? 10 : 5, 21, pa); rect(4, 22, 5, 22, so); rect(9, 22, 10, 22, so); rect(f ? 3 : 10, 22, f ? 3 : 11, 22, so); }
+  else { // side stride (sprite faces left, so forward is -x): legs slant from the hip to the foot, far leg drawn first
+    const leg = (xt, xf, c) => { for (let y = 18; y <= 21; y++) { const x = Math.round(xt + (xf - xt) * (y - 18) / 3); rect(x, y, x + 1, y, c); } rect(xf - 1, 22, xf + 1, 22, so); };
+    if (frame === 1) { leg(8, 11, paS); leg(6, 3, pa); }   // near leg forward
+    else { rect(7, 18, 8, 18, paS); rect(6, 19, 7, 19, paS); rect(5, 20, 6, 20, paS); rect(3, 21, 5, 21, so);   // passing pose: far leg lifted, knee forward
+      rect(7, 18, 8, 21, pa); rect(6, 22, 9, 22, so); }                                                             // near leg planted under the body
+  }
   rect(4, 13, 11, 18, sh); rect(10, 13, 11, 18, shS); rect(4, 18, 11, 18, shS);
   if (!side) { const sw = frame === 0 ? 0 : frame === 1 ? 1 : -1; rect(3, 13, 3, 16 - sw, sh); set(3, 17 - sw, sk); rect(12, 13, 12, 16 + sw, shS); set(12, 17 + sw, skS); }
-  else { const sw = frame === 0 ? 0 : frame === 1 ? 1 : -1; rect(7 + sw, 14, 8 + sw, 16, shS); set(7 + sw, 17, sk); set(8 + sw, 17, skS); }
+  else { const ax = frame === 0 ? 7 : frame === 1 ? 9 : 5; rect(ax, 14, ax + 1, 16, shS); set(ax, 17, sk); set(ax + 1, 17, skS); } // arm swings opposite the near leg
   if (back) { rect(4, 13, 11, 18, bg); rect(4, 15, 11, 15, bgS); rect(10, 13, 11, 18, bgS); rect(6, 16, 9, 17, bgS); }
   else if (side) { rect(10, 13, 12, 17, bg); rect(12, 13, 12, 17, bgS); }
   else { rect(5, 13, 5, 15, bg); rect(10, 13, 10, 15, bgS); }
