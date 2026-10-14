@@ -49,7 +49,7 @@ function resize() {
   vw = r.width; vh = r.height; cv.width = Math.round(vw * dpr); cv.height = Math.round(vh * dpr);
 }
 window.addEventListener('resize', resize);
-const baseZ = () => Math.max(1, Math.round((vw || 960) / (16 * 20)));      // about 20 tiles across, like a DS screen
+const baseZ = () => Math.max(2, Math.round((vw || 960) / (16 * 20)));      // about 20 tiles across, like a DS screen
 const zoom = () => Math.max(1, Math.min(6, baseZ() + zo));
 function setZoom(d) { zo = Math.max(1 - baseZ(), Math.min(6 - baseZ(), zo + d)); try { localStorage.setItem('aq-zoom2', zo); } catch (e) {} $('#zoomTxt').textContent = zoom() + '×'; }
 $('#zoomIn').addEventListener('click', () => setZoom(1));
@@ -145,8 +145,8 @@ function overlay(cam, t) {
     pill(p.name || '…', x, y, 'rgba(20,16,40,.78)', '#fff');
     if (p.say && p.sayT > t) bubble(p.say, x, y - 16);
   }
-  pill(S.name, sx(me.x), tagY(me.y), 'rgba(91,61,245,.92)', '#fff');
-  if (me.say && me.sayT > t) bubble(me.say, sx(me.x), tagY(me.y) - 16);
+  pill(S.name, sx(me.px), tagY(me.py), 'rgba(196,57,27,.95)', '#fff');
+  if (me.say && me.sayT > t) bubble(me.say, sx(me.px), tagY(me.py) - 16);
   for (const n of NPCS) { const x = sx(n.x), y = tagY(n.y) - (npcHasNew(n) || target === n ? 12 * z : 0); if (x > -50 && x < vw + 50 && y > -30 && y < vh + 30) pill(n.n, x, y, 'rgba(255,253,245,.92)', '#1b1830'); }
   // interact hint
   const f = facingThing(); $('#hint').textContent = f ? `Space / A: ${f.p ? 'meet ' + f.p.name : 'talk to ' + f.n.n}` : '';
@@ -183,7 +183,7 @@ function drawMini() {
   for (const p of others.values()) if (can('app') || (S.friends && S.friends[p.name])) dot(p.px, p.py, p.color || '#888', 2);
   if (can('explorer')) for (const l of LANDMARKS) if (!(S.landmarks || {})[l.n]) dot(l.x, l.y, '#ffe14d', 1.5);
   if (target) dot(target.x, target.y, '#ff5a7a', 3);
-  dot(me.px, me.py, S.color || '#5b3df5', 3);
+  dot(me.px, me.py, S.color || '#c4391b', 3);
   const z = zoom(), w = vw / z / World.TS, h = vh / z / World.TS;
   g.strokeStyle = '#ffffff'; g.lineWidth = 1; g.strokeRect((camera.x - w / 2) * MS, (camera.y - h / 2) * MS, w * MS, h * MS);
 }
@@ -304,7 +304,7 @@ function win(m) {
 /* ---------- multiplayer ---------- */
 function send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); }
 function myInfo() { const top = CAPS.filter(c => lvl(c.id) > 0).sort((a, b) => lvl(b.id) - lvl(a.id))[0];
-  return { name: S.name, color: S.color || '#5b3df5', xp: S.xp, rank: rank(), x: me.x, y: me.y, d: me.dir, top: top ? `${top.n} L${lvl(top.id)}` : '' }; }
+  return { name: S.name, color: S.color || '#c4391b', xp: S.xp, rank: rank(), x: me.x, y: me.y, d: me.dir, top: top ? `${top.n} L${lvl(top.id)}` : '' }; }
 function setNet() { const n = others.size + 1;
   net.innerHTML = ws && ws.readyState === 1 ? `<span class="dot on"></span>${n} on campus in <b>${esc(room)}</b>` : `<span class="dot"></span>Connecting to <b>${esc(room)}</b>…`; }
 function connect() {

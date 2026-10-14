@@ -7,32 +7,34 @@
 <meta name="description" content="A gamified recognition and progression prototype for BCom ASPIRE, built on the Human Capability Standards. WORK3601 Team 1.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f6f5fb; --panel:#ffffff; --panel2:#efedf7; --ink:#1b1830; --muted:#5f5b78; --line:#dcd8ea;
-  --accent:#5b3df5; --accent-ink:#fff; --good:#0f9d6b; --warn:#b26b00;
-  --head:#6d4cf5; --heart:#e0336b; --hands:#0b9488; --leap:#d97f06; --lead:#8a7a3a;
-  --shadow:0 1px 2px rgba(20,16,50,.06),0 6px 20px rgba(20,16,50,.06);
+  /* University of Sydney palette: Ochre, Charcoal, Sandstone, Jacaranda, Eucalypt, Heritage Rose, Navy */
+  --ochre:#e64626; --bg:#faf7f3; --panel:#ffffff; --panel2:#f4eee8; --ink:#2b2b2b; --muted:#5e5a56; --line:#e6ddd3;
+  --accent:#c4391b; --accent-ink:#fff; --good:#2f7d5d; --warn:#9a5b00;
+  --head:#4f62a8; --heart:#b3473d; --hands:#2f7f6f; --lead:#9a6b1f; --navy:#1a355e;
+  --shadow:0 1px 2px rgba(40,30,20,.06),0 6px 18px rgba(40,30,20,.06);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0f0d1c; --panel:#1a1730; --panel2:#231f3d; --ink:#eeeaff; --muted:#a49fc4; --line:#332e55;
-    --accent:#8f7bff; --accent-ink:#120f24; --good:#3ddc97; --warn:#ffb547;
-    --head:#9b84ff; --heart:#ff6b97; --hands:#2dd4bf; --leap:#fbbf24; --lead:#d9c37a;
+    --bg:#1e1d1c; --panel:#292827; --panel2:#33312f; --ink:#f3eee9; --muted:#b7afa7; --line:#43403d;
+    --accent:#ff7a59; --accent-ink:#1e1d1c; --good:#6cc39b; --warn:#f0b35a;
+    --head:#9fb0ea; --heart:#e7978d; --hands:#78c6b4; --lead:#e0b465; --navy:#9fb0ea;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0f0d1c; --panel:#1a1730; --panel2:#231f3d; --ink:#eeeaff; --muted:#a49fc4; --line:#332e55;
-  --accent:#8f7bff; --accent-ink:#120f24; --good:#3ddc97; --warn:#ffb547;
-  --head:#9b84ff; --heart:#ff6b97; --hands:#2dd4bf; --leap:#fbbf24; --lead:#d9c37a;
+  --bg:#1e1d1c; --panel:#292827; --panel2:#33312f; --ink:#f3eee9; --muted:#b7afa7; --line:#43403d;
+  --accent:#ff7a59; --accent-ink:#1e1d1c; --good:#6cc39b; --warn:#f0b35a;
+  --head:#9fb0ea; --heart:#e7978d; --hands:#78c6b4; --lead:#e0b465; --navy:#9fb0ea;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;overflow-x:hidden}
-h1,h2,h3,.disp{font-family:"Space Grotesk",Inter,sans-serif;letter-spacing:-.01em}
+h1,h2,h3,.disp{font-family:Inter,system-ui,sans-serif;letter-spacing:-.015em}
+h2{font-family:"Source Serif 4",Georgia,serif;font-weight:700;letter-spacing:-.01em}
 h2{font-size:1.45rem;margin:0 0 .3rem}
 h3{font-size:1.05rem;margin:0 0 .4rem}
 p{margin:.3rem 0 .8rem}
@@ -44,42 +46,54 @@ button{cursor:pointer}
 .small{font-size:.85rem}
 
 /* header */
-.top{background:var(--panel);border-bottom:1px solid var(--line)}
+.top{background:var(--panel);border-top:4px solid var(--ochre);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px}
 .brand{display:flex;align-items:center;gap:10px}
-.logo{width:40px;height:40px;border-radius:12px;background:conic-gradient(var(--head) 0 25%,var(--heart) 0 50%,var(--hands) 0 75%,var(--leap) 0);display:grid;place-items:center}
-.logo span{width:18px;height:18px;border-radius:50%;background:var(--panel)}
+.logo{width:40px;height:40px;border-radius:8px;background:var(--ochre);display:grid;place-items:center;flex:none}
+.logo svg{width:24px;height:24px;shape-rendering:crispEdges}
 .brand h1{font-size:1.3rem;margin:0}
 .brand .sub{font-size:.78rem;color:var(--muted)}
 .player{display:flex;align-items:center;gap:14px;flex:1;min-width:280px;max-width:560px}
-.rankgem{flex:none;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font:700 1.25rem "Space Grotesk";color:#fff;background:var(--rankc,#777);box-shadow:var(--shadow)}
+.rankgem{flex:none;width:48px;height:48px;border-radius:10px;display:grid;place-items:center;font:700 1.25rem Inter;color:#fff;background:var(--rankc,#777);box-shadow:var(--shadow)}
 .pinfo{flex:1;min-width:0}
-.pinfo .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.pname{border:0;background:transparent;font:700 1rem "Space Grotesk";padding:0;width:100%;min-width:0}
+.pinfo .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline;white-space:nowrap}
+#rankName{font-weight:600;color:var(--ink)}
+.pname{border:0;background:transparent;font:700 1rem Inter;padding:0;width:100%;min-width:0}
 .pname:focus{outline:2px solid var(--accent);border-radius:4px}
 .bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;margin:4px 0}
-.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--heart));border-radius:99px;transition:width .5s}
+.bar>i{display:block;height:100%;background:var(--ochre);border-radius:99px;transition:width .5s}
 .tools{display:flex;gap:8px}
 
+@media (max-width:640px){
+  .top .wrap{gap:10px;padding-top:10px;padding-bottom:10px}
+  .brand .sub{display:none}
+  .player{min-width:0;flex-basis:100%;order:3}
+  .rankgem{width:40px;height:40px;font-size:1rem}
+  .tools{order:2}
+}
 /* tabs */
 nav.tabs{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 nav.tabs button{border:0;background:none;padding:12px 12px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
-nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ochre)}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 main{padding:22px 0 40px}
 [hidden]{display:none!important}
 .lede{max-width:760px}
 
 /* buttons */
-.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:10px;font-weight:600}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:6px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink)}
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .btn.sm{padding:5px 10px;font-size:.85rem}
 
 /* next-rank strip */
-.goal{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:0 0 18px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;box-shadow:var(--shadow)}
-.goal b{font-family:"Space Grotesk"}
+.goal{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:0 0 18px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;box-shadow:var(--shadow)}
+.goal b{font-family:Inter}
 .chk{display:inline-flex;gap:6px;align-items:center;font-size:.9rem}
 .chk::before{content:"○";color:var(--muted)}
 .chk.ok::before{content:"●";color:var(--good)}
@@ -88,14 +102,14 @@ main{padding:22px 0 40px}
 .tree{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media (max-width:980px){.tree{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:560px){.tree{grid-template-columns:1fr}}
-.branch{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow);position:relative}
+.branch{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;box-shadow:var(--shadow);position:relative}
 .branch header{display:flex;gap:10px;align-items:center;margin-bottom:12px}
-.droot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:700 .8rem "Space Grotesk";color:#fff;background:var(--dc);flex:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--dc) 25%,transparent)}
+.droot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:700 .8rem Inter;color:#fff;background:var(--dc);flex:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--dc) 25%,transparent)}
 .branch h3{margin:0;color:var(--dc)}
 .branch .tag{font-size:.75rem;color:var(--muted)}
 .nodes{display:flex;flex-direction:column;gap:12px;position:relative;padding-left:22px}
 .nodes::before{content:"";position:absolute;left:21px;top:-12px;bottom:24px;width:3px;background:color-mix(in srgb,var(--dc) 35%,transparent);border-radius:3px}
-.node{position:relative;display:flex;gap:10px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:10px 10px 10px 30px;transition:transform .15s,border-color .15s}
+.node{position:relative;display:flex;gap:10px;align-items:center;text-align:left;width:100%;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:10px 10px 10px 30px;transition:transform .15s,border-color .15s}
 .node:hover{transform:translateX(3px);border-color:var(--dc)}
 .node::before{content:"";position:absolute;left:-7px;top:50%;width:20px;height:3px;background:color-mix(in srgb,var(--dc) 35%,transparent)}
 .orb{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;border:3px solid var(--dc);background:var(--panel)}
@@ -121,11 +135,11 @@ main{padding:22px 0 40px}
 
 /* cards */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
 .card .meta{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
 .chip.c{color:var(--cc);border-color:color-mix(in srgb,var(--cc) 45%,transparent);background:color-mix(in srgb,var(--cc) 10%,transparent)}
-.xp{font:700 1.1rem "Space Grotesk";color:var(--accent)}
+.xp{font:700 1.05rem Inter;color:var(--accent);white-space:nowrap}
 .card .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:6px}
 .filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
 .filters button{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 12px;font-size:.85rem;font-weight:600}
@@ -138,11 +152,11 @@ main{padding:22px 0 40px}
 .badge.off h3{color:var(--muted)}
 
 /* squad */
-.lb{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.lb{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
 .lb .r{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
 .lb .r:first-child{border-top:0}
 .lb .r.me{background:color-mix(in srgb,var(--accent) 10%,transparent)}
-.lb .pos{font:700 1.05rem "Space Grotesk";color:var(--muted);text-align:center}
+.lb .pos{font:700 1.05rem Inter;color:var(--muted);text-align:center}
 .two{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
 @media (max-width:860px){.two{grid-template-columns:1fr}}
 .switch{display:flex;gap:10px;align-items:center;margin:10px 0}
@@ -170,13 +184,13 @@ th{background:var(--panel2);font-weight:600}
 @media (max-width:760px){.cols3{grid-template-columns:1fr}}
 
 /* dialog */
-dialog{border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--ink);padding:0;width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 40px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:0;width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 40px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
 dialog::backdrop{background:rgba(10,8,25,.55)}
 .dlg{padding:20px}
 .dlg .x{float:right;border:0;background:var(--panel2);border-radius:8px;width:32px;height:32px;font-size:1.1rem}
 .ladder{list-style:none;padding:0;margin:12px 0}
 .ladder li{display:grid;grid-template-columns:30px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
-.ladder .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 .8rem "Space Grotesk";border:2px solid var(--dc);color:var(--dc)}
+.ladder .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 .8rem Inter;border:2px solid var(--dc);color:var(--dc)}
 .ladder li.done .n{background:var(--dc);color:#fff}
 .ladder li.cur{background:color-mix(in srgb,var(--dc) 8%,transparent);border-radius:8px}
 form.ev{display:flex;flex-direction:column;gap:8px;background:var(--panel2);padding:14px;border-radius:12px;margin:10px 0}
@@ -188,7 +202,7 @@ form.ev textarea{min-height:110px;resize:vertical}
 
 /* toasts */
 #toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:50;max-width:calc(100vw - 32px)}
-.toast{background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;font-weight:600;box-shadow:var(--shadow);animation:pop .35s ease-out}
+.toast{background:#2b2b2b;color:#fff;border-left:4px solid var(--ochre);padding:10px 14px;border-radius:12px;font-weight:600;box-shadow:var(--shadow);animation:pop .35s ease-out}
 @keyframes pop{from{transform:translateY(12px);opacity:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -205,6 +219,14 @@ form.ev textarea{min-height:110px;resize:vertical}
 .abrow .ab{font-size:1.3rem}
 .abilbar{display:flex;gap:3px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;margin:0 0 8px;padding-bottom:2px}
 .abilbar .ab{font-size:1.15rem;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:2px 4px;cursor:help}
+.howto{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.howto summary{cursor:pointer;font-weight:600}
+.howto ul{margin:8px 0 0;padding-left:18px;color:var(--muted)}
+.howto li{margin:3px 0}
+.ablabel{font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px}
+.chip{white-space:nowrap;display:inline-block}
+.meta{gap:5px}
+@media (max-width:640px){.hud .hide-sm{display:none}nav.tabs .wrap{mask-image:linear-gradient(90deg,#000 85%,transparent)}}
 /* campus */
 .stage canvas#map{image-rendering:pixelated}
 .zoombar{position:absolute;top:10px;right:10px;display:flex;gap:4px;align-items:center;background:rgba(20,16,40,.7);padding:4px;border-radius:10px;color:#fff;font:600 .85rem "Pixelify Sans",monospace}
@@ -218,7 +240,7 @@ form.ev textarea{min-height:110px;resize:vertical}
 .stage.flash::after{content:"";position:absolute;inset:0;z-index:4;animation:enc .65s steps(6) forwards;pointer-events:none}
 @keyframes enc{0%{background:#fff}20%{background:#000}40%{background:#fff}60%{background:#000}100%{background:#000}}
 .tbox,.bt-panel,.bt-card,.joinBox form h2{font-family:"Pixelify Sans",monospace}
-.tbox{border-radius:6px;box-shadow:inset 0 0 0 3px #fffdf5,inset 0 0 0 5px #6a8ad0,0 4px 0 rgba(0,0,0,.35);font-size:1.08rem}
+.tbox{border-radius:6px;box-shadow:inset 0 0 0 3px #fffdf5,inset 0 0 0 5px #e64626,0 4px 0 rgba(0,0,0,.35);font-size:1.08rem}
 .battle{background:linear-gradient(#bfe6ff 0 30%,#d8f2ff 30% 52%,#a8dc88 52% 70%,#90cc72 70%)}
 .bt-plat{position:relative;display:grid;place-items:center;width:clamp(120px,24vw,210px);height:clamp(80px,14vw,120px)}
 .bt-plat::before{content:"";position:absolute;bottom:0;left:0;right:0;height:38%;border-radius:50%;background:#7fbf5e;box-shadow:inset 0 -6px 0 #5f9c45,0 0 0 3px rgba(27,24,48,.25)}
@@ -232,14 +254,14 @@ canvas.bt-sprite.me{width:clamp(64px,10vw,96px);background:none;border-radius:0}
 .hud{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin:0 0 10px}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--muted);margin-right:6px}
 .dot.on{background:var(--good);box-shadow:0 0 8px var(--good)}
-.stage{position:relative;height:min(68vh,620px);min-height:360px;border-radius:18px;overflow:hidden;border:3px solid var(--ink);background:#2f7d3a;outline:none;touch-action:none;user-select:none}
+.stage{position:relative;height:min(68vh,620px);min-height:360px;border-radius:10px;overflow:hidden;border:3px solid #2b2b2b;background:#2f7d3a;outline:none;touch-action:none;user-select:none}
 .stage:focus-visible{box-shadow:0 0 0 3px var(--accent)}
 .stage canvas{width:100%;height:100%;display:block}
 .tbox{position:absolute;left:12px;right:12px;bottom:12px;background:#fffdf5;color:#1b1830;border:4px solid #1b1830;border-radius:12px;padding:12px 14px;box-shadow:0 4px 0 rgba(0,0,0,.35);font-size:1rem;max-height:60%;overflow:auto}
-.tb-name{font:700 .85rem "Space Grotesk";text-transform:uppercase;letter-spacing:.04em;color:#5b3df5;margin-bottom:4px}
+.tb-name{font:700 .85rem Inter;text-transform:uppercase;letter-spacing:.04em;color:#c4391b;margin-bottom:4px}
 .tb-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .tbox .btn{background:#fff;color:#1b1830;border-color:#cfcae0}
-.tbox .btn.primary{background:#5b3df5;color:#fff;border-color:#5b3df5}
+.tbox .btn.primary{background:#c4391b;color:#fff;border-color:#c4391b}
 .tbox .muted{color:#5f5b78}
 .battle{position:absolute;inset:0;color:#1b1830;display:grid;grid-template-rows:1fr 1fr auto;padding:14px;gap:8px}
 .bt-foe,.bt-me{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -250,10 +272,10 @@ canvas.bt-sprite.me{width:clamp(64px,10vw,96px);background:none;border-radius:0}
 .bt-msg{min-height:2.6em;margin-bottom:8px}
 .bt-moves{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
 .bt-moves .btn{background:#fff;color:#1b1830;border-color:#cfcae0;text-align:left}
-.bt-moves .btn.primary{background:#5b3df5;color:#fff}
+.bt-moves .btn.primary{background:#c4391b;color:#fff}
 .bt-panel .muted{color:#5f5b78}
 .joinBox{position:absolute;inset:0;display:grid;place-items:center;background:rgba(15,13,28,.6);padding:16px}
-.joinBox form{background:var(--panel);border-radius:16px;padding:20px;width:min(420px,100%);display:flex;flex-direction:column;gap:10px}
+.joinBox form{background:var(--panel);border-radius:10px;padding:20px;width:min(420px,100%);display:flex;flex-direction:column;gap:10px}
 .joinBox label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:.9rem}
 .joinBox input{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:8px}
 .swatches{display:flex;flex-wrap:wrap;gap:8px}
@@ -261,7 +283,7 @@ canvas.bt-sprite.me{width:clamp(64px,10vw,96px);background:none;border-radius:0}
 .swatches button[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--panel) inset}
 .pad{position:absolute;left:12px;bottom:12px;display:none;grid-template-areas:". u ." "l . r" ". d .";grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:2px;opacity:.85}
 .pad button,.padA{border:0;border-radius:12px;background:rgba(20,16,40,.7);color:#fff;font-size:1.1rem;touch-action:none}
-.padA{position:absolute;right:16px;bottom:40px;width:64px;height:64px;border-radius:50%;font:700 1.3rem "Space Grotesk";display:none}
+.padA{position:absolute;right:16px;bottom:40px;width:64px;height:64px;border-radius:50%;font:700 1.3rem Inter;display:none}
 @media (pointer:coarse){.pad{display:grid}.padA{display:block}.hide-sm{display:none}}
 .tbox:not([hidden])~.pad,.tbox:not([hidden])~.padA{display:none}
 .chatbar{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:10px}
@@ -285,10 +307,10 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
 <header class="top">
   <div class="wrap">
     <div class="brand">
-      <div class="logo" aria-hidden="true"><span></span></div>
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 12 12"><path fill="#fff" d="M4 1h4v1h1v2h1v7H8V8H4v3H2V4h1V2h1zm0 3v2h4V4z"/></svg></div>
       <div>
         <h1>ASPIRE Quest</h1>
-        <div class="sub">Recognition &amp; Progression prototype · BCom ASPIRE · S1 2027 MVP</div>
+        <div class="sub">BCom ASPIRE · Recognition &amp; Progression prototype</div>
       </div>
     </div>
     <div class="player">
@@ -303,15 +325,15 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
       </div>
     </div>
     <div class="tools noprint">
-      <button class="btn sm" id="sampleBtn" title="Load a sample student mid-way through first year">Demo student</button>
-      <button class="btn sm" id="resetBtn">Reset</button>
+      <button class="btn sm ghost" id="sampleBtn" title="Load a sample student mid-way through first year">Load demo student</button>
+      <button class="btn sm ghost" id="resetBtn">Reset</button>
     </div>
   </div>
 </header>
 
 <nav class="tabs" aria-label="Sections">
   <div class="wrap" role="tablist">
-    <button role="tab" data-tab="campus" aria-selected="true">🗺️ Campus</button>
+    <button role="tab" data-tab="campus" aria-selected="true">Campus</button>
     <button role="tab" data-tab="tree">Skill tree</button>
     <button role="tab" data-tab="quests">Quests</button>
     <button role="tab" data-tab="badges">Badges</button>
@@ -328,7 +350,7 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
       <span class="small muted hide-sm">Move: arrows/WASD · Run: Shift · Talk: Space · Chat: T · Map: M · Zoom: +/−</span>
       <button class="btn sm" id="profileBtn">Name &amp; room</button>
     </div>
-    <div class="abilbar" id="abilbar" aria-label="Your abilities"></div>
+    <div class="ablabel">Abilities</div><div class="abilbar" id="abilbar" aria-label="Your abilities"></div>
     <div class="stage" id="stage" tabindex="0" aria-label="Campus map. Use arrow keys to move and Space to talk.">
       <canvas id="map"></canvas>
       <div class="zoombar"><button class="btn sm" id="zoomOut" aria-label="Zoom out">−</button><span id="zoomTxt">1×</span><button class="btn sm" id="zoomIn" aria-label="Zoom in">+</button><button class="btn sm" id="miniBtn" aria-label="Toggle minimap">🗺️</button></div>
@@ -350,7 +372,15 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
       <form id="chatForm"><input id="chatIn" maxlength="120" placeholder="Say something to people on campus…" autocomplete="off" aria-label="Chat message"><button class="btn sm primary">Send</button></form>
       <div class="emotes"><button class="btn sm" data-emote="👋">👋</button><button class="btn sm" data-emote="🎉">🎉</button><button class="btn sm" data-emote="📚">📚</button><button class="btn sm" data-emote="☕">☕</button><button class="btn sm" data-emote="🤝">🤝</button></div>
     </div>
-    <p class="small muted" style="margin-top:10px">The icons above are your <b>abilities</b>. Each one unlocks when a capability in your skill tree reaches the right HCS level, for example 👟 Running Shoes at Initiative &amp; Drive L1, 🗺️ the map at Problem Solving &amp; Data L1, 🚲 a bike at Innovative Thinking L2, and 🌊 Surf at LEAD Agility. Walk around campus and talk to anyone with a <b>!</b> to check in to ASPIRE quests. In-person quests can only be done at their location. The long grass in Victoria Park hides <b>challenges</b>: beat them using your capabilities as moves. Walk up to a classmate and press Space to wave or squad up. Check in to a quest with a squadmate nearby for a +25 XP bonus. The campus is built from real OpenStreetMap data, so buildings, paths and trees are where they really are.</p>
+    <details class="howto"><summary>How to play</summary>
+      <ul class="small">
+        <li><b>Move</b> with the arrow keys or WASD (on a phone, the D-pad). Tap a direction to turn on the spot.</li>
+        <li><b>Talk</b> to anyone with a <b>!</b> using Space or A. They check you in to real ASPIRE quests. In-person quests only work at their building.</li>
+        <li><b>Abilities</b> are the icons above the map. Each unlocks when a capability in your skill tree reaches an HCS level, for example running shoes at Initiative &amp; Drive L1 and the map at Problem Solving &amp; Data L1.</li>
+        <li><b>Challenges</b> hide in Victoria Park's long grass. Your capabilities are your moves.</li>
+        <li><b>Classmates</b> in your room code appear live. Walk up and press Space to wave or squad up. Checking in together earns a squad bonus.</li>
+        <li>The campus is built from OpenStreetMap data, so buildings and paths are where they really are.</li>
+      </ul></details>
   </section>
 
   <section id="tree" hidden>
@@ -358,8 +388,8 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
     <div class="tree" id="treeGrid"></div>
     <div class="branch lead" id="leadBranch"></div>
     <div class="legend">
-      <span><b>Levels:</b></span>
-      <span>1 Spark: took part</span><span>2 Reflect: wrote it up</span><span>3 Apply: endorsed artefact</span><span>4 Prove: verified by staff or an employer</span><span>5 Uplift: helped others grow</span>
+      <span><b>Levels (HCS):</b></span>
+      <span>1 Spark · Follow</span><span>2 Reflect · Support</span><span>3 Apply · Action</span><span>4 Prove · Guide</span><span>5 Own · Execute</span>
     </div>
   </section>
 
@@ -721,8 +751,8 @@ function renderQuests(){
   $('#questGrid').innerHTML=QUESTS.filter(q=>qFilter==='All'||q.s===qFilter).map(q=>{
     const done=S.q[q.id]||0, at=window.Campus?Campus.where(q.id):'';
     return `<div class="card"><div class="meta"><span class="chip">${q.s}</span><span class="chip">${q.m}</span>${q.rep?'<span class="chip">Repeatable</span>':''}</div>
-      <h3>${q.n}</h3>${at?`<span class="small muted">📍 ${at}</span>`:''}<div class="meta">${q.t.map(t=>`<span class="chip c" style="--cc:${cv(CAP[t].d)}">${CAP[t].n}</span>`).join('')}</div>
-      <div class="foot"><span class="xp">+${q.xp} XP</span><span>${done?`<span class="small muted">done ×${done}</span> `:''}${questBtn(q)}</span></div></div>`;
+      <h3>${q.n}</h3>${at?`<span class="small muted">📍 ${at}</span>`:''}${done?`<span class="small muted">Completed ${done}×</span>`:''}<div class="meta">${q.t.map(t=>`<span class="chip c" style="--cc:${cv(CAP[t].d)}">${CAP[t].n}</span>`).join('')}</div>
+      <div class="foot"><span class="xp">+${q.xp} XP</span>${questBtn(q)}</div></div>`;
   }).join('');
 }
 function renderBadges(){
@@ -747,7 +777,7 @@ function renderPortfolio(){
   const list=CAPS.flatMap(c=>ents(c.id).filter(e=>e.level>=2).map(e=>({c,e}))).sort((a,b)=>b.e.date.localeCompare(a.e.date)||b.e.level-a.e.level);
   $('#pfList').innerHTML=list.length?list.map(({c,e})=>`<div class="pf-entry" style="--cc:${cv(c.d)}"><div class="h"><b>${c.n} · Level ${e.level} ${LEVELS[e.level].n}</b>
     <span><span class="small muted">${e.date}</span> <span class="status ${e.st}">${e.st==='v'?(e.level>=4?'Verified credential':'Recorded'):'Pending'}</span></span></div>
-    <div class="small">${esc(e.text)}</div>${e.by?`<div class="small muted">${e.level>=4?'Verified':'Endorsed'} by ${esc(e.by)}</div>`:''}</div>`).join('')
+    <div class="small">${esc(e.text)}</div>${e.by?`<div class="small muted">${e.st==='p'?'Awaiting '+(e.level>=4?'verification':'endorsement')+' from':e.level>=4?'Verified by':'Endorsed by'} ${esc(e.by)}</div>`:''}</div>`).join('')
     :'<p class="muted">Nothing yet. Reach Level 2 (Reflect) in any capability and it appears here.</p>';
 }
 
@@ -860,9 +890,17 @@ $('#sampleBtn').addEventListener('click',()=>{
   const plan={welcome:'collab',study:'life',mentee:'drive',openday:'comm',job:'life',industry:'crit',casecomp:'psd',ai:'dig',care:'emp',hack:'crea',club:'innov'};
   Object.entries(plan).forEach(([q,c])=>doQuest(q,c));
   doQuest('industry','cult'); doQuest('leadws','eth');
-  const R='Situation: our case competition team had two days to analyse a retailer losing market share. Task: I owned the customer data. Action: I cleaned the survey data, built pivot tables, and challenged our first assumption when the numbers did not support it. Result: we pivoted to a loyalty strategy and placed second. I learned to let evidence lead the argument.';
-  ['collab','life','comm','psd','crit','innov','emp','dig','drive'].forEach(c=>{ ents(c).push({level:2,st:'v',date:'2027-04-02',text:R}); S.xp+=20; });
-  ents('innov').push({level:2,st:'v',date:'2027-04-03',text:R}); S.xp+=20;
+  const R={
+    collab:'Situation: my Welcome Week group had to run a stall with people we had just met. Task: organise who did what. Action: I suggested we split roles by strengths and checked in with the quieter members. Result: we ran the stall all day and two of us now study together. HCS skill: Cooperative.',
+    life:'Situation: I failed my first FINC quiz. Task: work out why before the mid-sem. Action: I went to a PASS session, asked my tutor for feedback and rebuilt my study plan. Result: I scored 78% on the mid-sem. HCS mindset: Growth mindset, learning from setbacks.',
+    comm:'Situation: at Open Day a parent asked me why they should choose the BCom. Task: explain it simply. Action: I told the story of my own first semester instead of reading the brochure. Result: they stayed to ask more questions and took a course guide. HCS skill: Storytelling.',
+    psd:'Situation: our case comp team had 48 hours to analyse a retailer losing market share. Task: I owned the customer data. Action: I cleaned the survey data, built pivot tables and charted churn by segment. Result: the data pointed us to a loyalty strategy and we placed second. HCS skill: Analysis.',
+    crit:'Situation: an industry panellist claimed AI would replace graduate analysts within five years. Task: decide whether I agreed. Action: I compared two reports with different assumptions and asked the panel about them. Result: I wrote a short summary for my tutorial. HCS skill: Objective.',
+    innov:'Situation: at the hackathon our first idea had already been built by a startup. Task: pivot fast. Action: I proposed testing a smaller version with five classmates in an hour. Result: the feedback changed our pitch and we made the final. HCS skill: Experimental.',
+    emp:'Situation: a regular at my café shift was upset about a wrong order. Task: fix it without the queue building up. Action: I listened, apologised and remade it while my colleague took orders. Result: they thanked me and came back the next week. HCS skill: Sensitive.',
+    dig:'Situation: in the responsible AI workshop we used AI to draft a market summary. Task: check whether it was accurate. Action: I verified each figure against the ABS source and flagged two errors. Result: our group submitted a corrected version with sources. HCS skill: Information handling.',
+    drive:'Situation: I was juggling 20 hours of work with four units. Task: stop falling behind. Action: I blocked out study time each Sunday, set weekly targets and booked a mentoring catch-up. Result: I submitted every assessment on time. HCS skill: Prioritising.'};
+  Object.entries(R).forEach(([c,txt],i)=>{ ents(c).push({level:2,st:'v',date:'2027-0'+(3+(i%2))+'-'+String(10+i*2).padStart(2,'0'),text:txt}); S.xp+=20; });
   ents('psd').push({level:3,st:'v',date:'2027-04-20',text:'Case competition financial model and data appendix',by:'Maria Chen (Mentor)'}); S.xp+=40;
   ents('comm').push({level:3,st:'v',date:'2027-04-22',text:'Open Day talk to 40 prospective students and their parents',by:'Priya N. (Peer)'}); S.xp+=40;
   ents('comm').push({level:4,st:'p',date:'2027-05-01',text:'Weekly client updates during part-time role at a café group',by:'J. Lee (Employer)'});
