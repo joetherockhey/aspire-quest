@@ -37,10 +37,11 @@ const DAILY_BATTLE_XP = 75, WIN_XP = 15;
 /* ---------- state ---------- */
 const me = { x: 0, y: 0, px: 0, py: 0, fx: 0, fy: 0, tx: 0, ty: 0, t: 0, dir: 'd', frame: 0, stepN: 0, moving: false, turnUntil: 0, energy: 100, bike: false };
 const maxE = () => can('stamina') ? 130 : 100;
+const setE = v => { me.energy = Math.max(0, Math.min(maxE(), v)); S.energy = me.energy; saveSoon(); };
 let LANDMARKS = [];
 const others = new Map();
 let ws = null, myId = null, room = '', retry = 2000, target = null, battle = null, busy = false;
-const keys = new Set(); let running = false;
+const keys = new Set(); let running = false, warnedRun = false;
 const myLook = () => { const L = World.lookFor(World.seedOf(S.name), S.color); if (can('style') && S.style != null) { L.style = S.style; L.hat = S.hat || L.hat; } return L; };
 
 /* ---------- view ---------- */
@@ -54,8 +55,9 @@ const zoom = () => Math.max(1, Math.min(6, baseZ() + zo));
 function setZoom(d) { zo = Math.max(1 - baseZ(), Math.min(6 - baseZ(), zo + d)); try { localStorage.setItem('aq-zoom2', zo); } catch (e) {} $('#zoomTxt').textContent = zoom() + '×'; }
 $('#zoomIn').addEventListener('click', () => setZoom(1));
 $('#zoomOut').addEventListener('click', () => setZoom(-1));
-stage.addEventListener('wheel', e => { e.preventDefault(); setZoom(e.deltaY < 0 ? 1 : -1); }, { passive: false });
-const toggleMini = () => { if (!can('map')) return toast('🔒 Campus Map unlocks at Problem Solving & Data Level 1'); miniCv.hidden = !miniCv.hidden; };
+stage.addEventListener('wheel', e => { if (!e.ctrlKey && !e.metaKey) return; e.preventDefault(); setZoom(e.deltaY < 0 ? 1 : -1); }, { passive: false });
+document.querySelectorAll('.zoombar button, [data-emote]').forEach(b => b.addEventListener('click', () => stage.focus()));
+const toggleMini = () => { if (battle || busy) return; if (!can('map')) return toast('🔒 Campus Map unlocks at Problem Solving & Data Level 1'); miniCv.hidden = !miniCv.hidden; };
 $('#miniBtn').addEventListener('click', toggleMini);
 
 /* ---------- actors ---------- */
@@ -97,7 +99,7 @@ function step(dt) {
 function arrive() {
   Object.assign(me, { x: me.tx, y: me.ty, px: me.tx, py: me.ty, moving: false });
   S.pos3 = { x: me.x, y: me.y }; saveSoon();
-  if (can('regen') && me.energy < maxE()) me.energy = Math.min(maxE(), me.energy + 2);
+  if (can('regen') && me.energy < maxE()) setE(me.energy + 2);
   for (const l of LANDMARKS) if (can('explorer') && !(S.landmarks || {})[l.n] && Math.abs(l.x - me.x) + Math.abs(l.y - me.y) <= 2) { commit(() => { S.landmarks = S.landmarks || {}; S.landmarks[l.n] = 1; S.xp += 10; }); toast(`⭐ Landmark discovered: ${l.n} (+10 XP)`); }
   if (target && Math.abs(target.x - me.x) + Math.abs(target.y - me.y) <= 2) target = null;
   if (!me.bike && World.isTall(me.x, me.y) && me.energy > 0 && Math.random() < .1) startBattle();
@@ -140,16 +142,18 @@ function overlay(cam, t) {
   }
   ctx.font = '600 12px "Pixelify Sans", monospace';
   const tagY = my => sy(my) - 25 * z - 6;
+  placed = [];
+  pill(S.name, sx(me.px), tagY(me.py), 'rgba(196,57,27,.95)', '#fff');
+  if (me.say && me.sayT > t) bubble(me.say, sx(me.px), tagY(me.py) - 16);
   for (const p of others.values()) {
     const x = sx(p.px), y = tagY(p.py); if (x < -50 || x > vw + 50 || y < -40 || y > vh + 40) continue;
     pill(p.name || '…', x, y, 'rgba(20,16,40,.78)', '#fff');
     if (p.say && p.sayT > t) bubble(p.say, x, y - 16);
   }
-  pill(S.name, sx(me.px), tagY(me.py), 'rgba(196,57,27,.95)', '#fff');
-  if (me.say && me.sayT > t) bubble(me.say, sx(me.px), tagY(me.py) - 16);
   for (const n of NPCS) { const x = sx(n.x), y = tagY(n.y) - (npcHasNew(n) || target === n ? 12 * z : 0); if (x > -50 && x < vw + 50 && y > -30 && y < vh + 30) pill(n.n, x, y, 'rgba(255,253,245,.92)', '#1b1830'); }
+  const eTxt = `⚡ ${Math.round(me.energy)}/${maxE()}`; if ($('#energy').textContent !== eTxt) $('#energy').textContent = eTxt;
   // interact hint
-  const f = facingThing(); $('#hint').textContent = f ? `Space / A: ${f.p ? 'meet ' + f.p.name : 'talk to ' + f.n.n}` : '';
+  const f = busy || battle ? null : facingThing(); $('#hint').textContent = f ? `Space / A: ${f.p ? 'meet ' + f.p.name : 'talk to ' + f.n.n}` : '';
   // off-screen waypoint arrow
   if (target) {
     const X = sx(target.x), Y = sy(target.y);
@@ -162,9 +166,12 @@ function overlay(cam, t) {
     }
   }
 }
-function pill(text, x, y, bg, fg) {
-  const w = ctx.measureText(text).width + 10;
-  ctx.fillStyle = bg; ctx.fillRect(Math.round(x - w / 2), Math.round(y - 8), Math.round(w), 16);
+let placed = [];
+function pill(text, x, y, bg, fg) {   // tags dodge upward until they don't overlap a tag already drawn this frame
+  const w = ctx.measureText(text).width + 10, h = 16;
+  for (let k = 0; k < 4; k++) { const hit = placed.some(r => Math.abs(r.x - x) < (r.w + w) / 2 && Math.abs(r.y - y) < h); if (!hit) break; y -= h + 1; }
+  placed.push({ x, y, w });
+  ctx.fillStyle = bg; ctx.fillRect(Math.round(x - w / 2), Math.round(y - 8), Math.round(w), h);
   ctx.fillStyle = fg; ctx.fillText(text, Math.round(x), Math.round(y) + 1);
 }
 function bubble(text, x, y) {
@@ -202,7 +209,8 @@ function facingThing() {
   const n = NPCS.find(n => n.x === fx && n.y === fy); if (n) return { n };
   const p = [...others.values()].find(p => Math.round(p.px) === fx && Math.round(p.py) === fy); return p ? { p } : null;
 }
-const teleport = (x, y) => Object.assign(me, { x, y, px: x, py: y, moving: false });
+const teleport = (x, y) => { for (let r = 0; r < 6; r++) for (const [dx, dy] of [[0, 0], [0, r], [r, 0], [0, -r], [-r, 0], [r, r], [-r, r]]) { const X = x + dx, Y = y + dy;
+    if (World.inMain(X, Y) && !NPCS.some(n => n.x === X && n.y === Y)) { Object.assign(me, { x: X, y: Y, px: X, py: Y, moving: false }); S.pos3 = { x: X, y: Y }; return; } } };
 function interact() {
   if (!tbox.hidden) return closeBox();
   if (!active()) return;
@@ -223,22 +231,23 @@ tbox.addEventListener('click', e => {
 });
 function talk(n) {
   S.met = S.met || {}; S.met[n.id] = 1; saveSoon();
-  if (n.heal) { me.energy = maxE(); return box(n.n + ' · ' + n.at, n.say + `<br><span class="small muted">Energy ${me.energy}/${maxE()}</span>`); }
+  if (n.heal) { setE(maxE()); return box(n.n + ' · ' + n.at, n.say + `<br><span class="small muted">Energy ${me.energy}/${maxE()}</span>`); }
   if (!n.q.length) return box(n.n + ' · ' + n.at, n.say);
   const qs = n.q.map(id => QUESTS.find(x => x.id === id));
-  box(n.n + ' · ' + n.at, n.say, qs.map(qq => ({ label: (!qq.rep && S.q[qq.id] ? '✓ ' : '') + qq.n + ' · +' + qq.xp + ' XP', primary: !S.q[qq.id],
-    fn: () => { if (!qq.rep && S.q[qq.id]) return toast('Already completed'); openQuest(qq.id); } })));
+  box(n.n + ' · ' + n.at, n.say, qs.map(qq => { const done = (!qq.rep && S.q[qq.id]) || doneToday(qq);
+    return { label: (done ? '✓ ' : '') + qq.n + (done ? (qq.rep ? ' · done today' : ' · completed') : ' · +' + qq.xp + ' XP'), primary: !done,
+      fn: () => done ? toast(qq.rep ? 'Already checked in today. Come back tomorrow.' : 'Already completed') : openQuest(qq.id) }; }));
 }
 function meet(p) {
   const fr = S.friends && S.friends[p.name];
   const info = can('readroom') ? `${RANKS[p.rank || 0]?.n || 'Rookie'} · ${p.xp || 0} XP${p.top ? ' · strongest: ' + esc(p.top) : ''}` : 'A fellow student. <span class="small muted">(Unlock Read the Room at Empathy Level 1 to see their rank and strongest capability.)</span>';
-  box(p.name, `${info}${fr ? '<br>🤝 In your squad' : ''}`, [
+  box(esc(p.name), `${info}${fr ? '<br>🤝 In your squad' : ''}`, [
     { label: '👋 Wave', fn: () => emote('👋') },
     ...(can('comfort') ? [{ label: can('coach') ? '💞 Coach' : '🤗 Comfort', fn: () => emote(can('coach') ? '💞' : '🤗') }] : []),
     ...(fr ? [] : can('squadup') ? [{ label: '🤝 Squad up', primary: true, fn: () => { send({ t: 'invite', to: p.id }); toast(`Squad invite sent to ${p.name}`); } }] : []),
   ]);
 }
-function addFriend(name, xp, rk) { S.friends = S.friends || {}; S.friends[name] = { xp: xp || 0, rank: rk || 0 }; commit(() => {}); }
+function addFriend(name, xp, rk) { S.friends = S.friends || {}; S.friends[name] = { xp: xp || 0, rank: Math.min(RANKS.length - 1, rk || 0) }; commit(() => {}); }
 
 /* ---------- battles ---------- */
 function moves() {
@@ -250,7 +259,7 @@ const pixelEmoji = e => { const c = document.createElement('canvas'); c.width = 
 const rallied = () => can('rally') && [...others.values()].some(p => S.friends && S.friends[p.name] && Math.hypot(p.px - me.x, p.py - me.y) <= 5);
 function startBattle() {
   const f = FOES[Math.random() * FOES.length | 0];
-  keys.clear(); battle = { shield: can('shield'), f, hp: f.hp, msg: `A wild <b>${f.n}</b> appeared!`, lock: true, img: pixelEmoji(f.e) };
+  keys.clear(); battle = { shield: can('shield'), f, hp: f.hp, msg: `A wild <b>${f.n}</b> appeared!`, lock: true, fresh: true, img: pixelEmoji(f.e) };
   stage.classList.add('flash'); setTimeout(() => { stage.classList.remove('flash'); if (battle) { battle.lock = false; renderBattle(); } }, 650);
 }
 function hpBar(v, max) { const p = v / max, c = p > .5 ? '#3ddc5b' : p > .2 ? '#f5c63b' : '#ef4b4b'; return `<div class="hp"><b>HP</b><div class="hpbar"><i style="width:${p * 100}%;background:${c}"></i></div></div>`; }
@@ -258,11 +267,12 @@ function renderBattle() {
   const el = $('#battle'); if (!battle) { el.hidden = true; return; }
   const { f } = battle; el.hidden = false;
   el.innerHTML = `<div class="bt-foe"><div class="bt-card"><b>${f.n}</b><span class="small">${can('inspect') ? `Weak to ${DOMAINS[f.weak].name} · resists ${DOMAINS[f.resist].name}` : 'Weakness: ??? <span class="muted">(🔍 Inspect: Critical Thinking L1)</span>'}</span>${hpBar(battle.hp, f.hp)}</div>
-      <div class="bt-plat"><img class="bt-sprite" src="${battle.img}" alt="${f.n}"></div></div>
-    <div class="bt-me"><div class="bt-plat me"><canvas class="bt-sprite me" id="btMe" width="16" height="24"></canvas></div>
+      <div class="bt-plat"><img class="bt-sprite ${battle.fresh ? 'enter' : ''}" src="${battle.img}" alt="${f.n}"></div></div>
+    <div class="bt-me"><div class="bt-plat me"><canvas class="bt-sprite me ${battle.fresh ? 'enter' : ''}" id="btMe" width="16" height="24"></canvas></div>
       <div class="bt-card"><b>${esc(S.name)}</b><span class="small">Energy ${Math.round(me.energy)}/${maxE()}${rallied() ? ' · 🚩 Rallied' : ''}</span>${hpBar(me.energy, maxE())}</div></div>
     <div class="bt-panel"><div class="bt-msg">${battle.msg}</div><div class="bt-moves">${battle.done ? '<button class="btn primary" data-bm="end">Continue ▶</button>' :
       moves().map((m, i) => `<button class="btn" data-bm="${i}" style="border-left:5px solid ${m.d ? `var(${DOMAINS[m.d].c})` : 'var(--line)'}" ${battle.lock ? 'disabled' : ''}>${m.n}<span class="small muted"> · ${m.cap ? m.cap.n + ' L' + m.l : 'no skills yet'}</span></button>`).join('') + `<button class="btn" data-bm="run" ${battle.lock ? 'disabled' : ''}>RUN</button>`}</div></div>`;
+  battle.fresh = false;
   const g = $('#btMe').getContext('2d'); g.drawImage(World.charSprite(myLook(), 'u', 0), 0, 0);
 }
 $('#battle').addEventListener('click', e => {
@@ -282,20 +292,20 @@ $('#battle').addEventListener('click', e => {
     if (!battle) return;
     let hit = Math.round((8 + (Math.random() * 9 | 0)) * (can('foresight') ? .75 : 1));
     if (battle.shield) { battle.shield = false; hit = 0; }
-    me.energy = Math.max(0, me.energy - hit);
+    setE(me.energy - hit);
     battle.msg = hit ? `${f.n} ${f.hit}! (−${hit} energy)` : `${f.n} ${f.hit}… but 🛡️ Integrity Shield blocked it!`; battle.lock = false;
     if (me.energy <= 0) {
-      if (can('secondwind')) { me.energy = 40; battle.msg += '<br>🔁 Second Wind! You bounce back to 40 energy.'; }
+      if (can('secondwind')) { setE(40); battle.msg += '<br>🔁 Second Wind! You bounce back to 40 energy.'; }
       else { battle.msg += '<br>You\u2019re out of energy. Visit the <b>Wellbeing Coach</b> at Charles Perkins Centre to recharge.'; battle.done = true; target = NPCS.find(n => n.heal); }
     }
     renderBattle();
   }, 900);
 });
 function win(m) {
-  const day = new Date().toISOString().slice(0, 10);
+  const day = today();
   if (!S.bx || S.bx.d !== day) S.bx = { d: day, xp: 0 };
   const gain = Math.max(0, Math.min(WIN_XP, (can('fair') ? 100 : DAILY_BATTLE_XP) - S.bx.xp));
-  battle.msg = `${battle.f.n} was overcome! ${gain > 0 ? `+${gain} XP.` : 'Daily challenge XP cap reached (75).'}<br><span class="small">Tip: write it up as a <b>${m.n}</b> reflection to level the capability, because XP alone never levels a skill.</span>${m.cap && can('notes') ? `<br><button class="btn sm" data-notes="${m.cap.id}">📓 Write reflection</button>` : ''}`;
+  battle.msg = `${battle.f.n} was overcome! ${gain > 0 ? `+${gain} XP.` : 'Daily challenge XP cap reached (75).'}<br><span class="small">${m.cap ? `Tip: XP never levels a skill on its own. Write up how you used <b>${m.n}</b> (${m.cap.n}) as evidence to level it.` : 'Tip: check in to quests to unlock capabilities. They become your moves.'}</span>${m.cap && can('notes') && lvl(m.cap.id) === 1 && !pending(m.cap.id) ? `<br><button class="btn sm" data-notes="${m.cap.id}">📓 Write reflection</button>` : ''}`;
   battle.done = true;
   if (gain > 0) commit(() => { S.bx.xp += gain; S.xp += gain; });
   renderBattle();
@@ -325,7 +335,7 @@ function connect() {
       if (p) { p.say = txt; p.sayT = now + 6000; }
       if (m.t === 'chat') logChat(m.id === myId ? S.name : (others.get(m.id)?.name || '?'), m.m);
       if (m.t === 'chat' && m.m.startsWith('📣') && m.id !== myId) toast(`${others.get(m.id)?.name || '?'}: ${m.m}`);
-      if (m.t === 'emote' && (m.e === '🤗' || m.e === '💞') && m.id !== myId && p && Math.hypot(p.px - me.x, p.py - me.y) <= 3) { const h = m.e === '💞' ? 50 : 25; me.energy = Math.min(maxE(), me.energy + h); toast(`${p.name} cheered you up: +${h} energy`); }
+      if (m.t === 'emote' && (m.e === '🤗' || m.e === '💞') && m.id !== myId && p && Math.hypot(p.px - me.x, p.py - me.y) <= 3) { const h = m.e === '💞' ? 50 : 25; setE(me.energy + h); toast(`${p.name} cheered you up: +${h} energy`); }
     }
     else if (m.t === 'invite') box('Squad invite', `<b>${esc(m.name)}</b> wants to squad up. Squad members see each other's progress and earn a bonus for doing quests together.`,
       [{ label: '🤝 Accept', primary: true, fn: () => { send({ t: 'accept', to: m.from }); addFriend(m.name, m.xp, m.rank); toast(`${m.name} joined your squad`); } }]);
@@ -336,18 +346,19 @@ function connect() {
 function up(p) {
   const o = others.get(p.id), x = p.x ?? 0, y = p.y ?? 0;
   others.set(p.id, Object.assign(o || { px: x, py: y }, p, { x, y, dir: p.d || o?.dir, look: World.lookFor(World.seedOf(p.name), p.color) }));
-  if (S.friends && S.friends[p.name]) { S.friends[p.name] = { xp: p.xp || 0, rank: p.rank || 0 }; saveSoon(); }
+  if (S.friends && S.friends[p.name]) { S.friends[p.name] = { xp: p.xp || 0, rank: Math.min(RANKS.length - 1, p.rank || 0) }; saveSoon(); }
 }
 function logChat(who, msg) { const l = $('#chatLog'), d = document.createElement('div'); d.innerHTML = `<b>${esc(who)}:</b> ${esc(msg)}`; l.append(d); while (l.children.length > 6) l.firstChild.remove(); }
 function emote(e) { send({ t: 'emote', e }); if (!ws || ws.readyState !== 1) { me.say = e; me.sayT = performance.now() + 4000; } }
 let saveT; const saveSoon = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem('aspire-quest-v1', JSON.stringify(S)); } catch (e) {} }, 800); };
 
 function toggleBike() {
+  if (battle || busy) return;
   if (!can('bike')) return toast('🔒 Bicycle unlocks at Innovative Thinking Level 2');
   if (World.isWater(me.x, me.y)) return; me.bike = !me.bike; toast(me.bike ? '🚲 Got on the bike' : 'Got off the bike');
 }
 function fastTravel() {
-  if (!active() && tbox.hidden) return;
+  if (battle || busy || !active()) return;
   if (!can('travel')) return toast('🔒 Fast Travel unlocks at Digital Acumen Level 2');
   const met = NPCS.filter(n => (S.met || {})[n.id]);
   if (!met.length) return box('Campus shuttle', 'Talk to quest-givers first. The shuttle only goes to people you have met.');
@@ -363,7 +374,7 @@ document.addEventListener('click', e => { const a = e.target.closest('[data-ab]'
 /* ---------- setup / controls ---------- */
 const COLORS = ['#e04848', '#3d7fe0', '#2fb36b', '#f2a93b', '#8b5cf6', '#ec4899', '#14b8a6', '#334155'];
 function setup() {
-  const r0 = new URLSearchParams(location.search).get('room') || S.room || 'bcom-2027';
+  const r0 = urlRoom || S.room || 'bcom-2027';
   $('#joinBox').hidden = false; busy = true;
   $('#joinBox').innerHTML = `<form id="joinForm"><h2>Join the campus</h2>
     <p class="small muted">Your name and avatar are visible to everyone in your cohort room. Your progress stays on your device. Only your XP and rank are shared.</p>
@@ -394,9 +405,12 @@ window.addEventListener('keydown', e => {
   if ($('#campus').hidden) return;
   if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) { if (e.key === 'Escape') document.activeElement.blur(); return; }
   if (document.querySelector('dialog[open]')) return;
-  if (document.activeElement?.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+  if (document.activeElement?.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) {
+    if (document.activeElement.closest('#tbox,#battle,#joinBox,#chatForm')) return;
+    document.activeElement.blur(); stage.focus();
+  }
   if (KEYMAP[e.key]) { e.preventDefault(); keys.add(KEYMAP[e.key]); }
-  else if (e.key === 'Shift') running = true;
+  else if (e.key === 'Shift') { running = true; if (!can('run') && !e.repeat && !warnedRun) { warnedRun = true; toast('🔒 Running Shoes unlock at Initiative & Drive Level 1'); } }
   else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); interact(); }
   else if (e.key === 't' || e.key === 'T') { e.preventDefault(); $('#chatIn').focus(); }
   else if (e.key === 'm' || e.key === 'M') toggleMini();
@@ -430,8 +444,9 @@ World.load('map.json').then(() => {
     for (let r = 0; r < 20; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
       const X = x + dx, Y = y + dy; if (World.inMain(X, Y) && !occ.has(X + ',' + Y) && !World.isChoke(X, Y, occ)) { occ.add(X + ',' + Y); return [X, Y]; } } return World.nearestFree(x, y); };
   for (const n of NPCS) { const a = (n.b && World.door(n.b)) || A[n.a] || A.quad; [n.x, n.y] = place(a[0] + n.dx, a[1] + n.dy); n.look = World.lookFor(World.seedOf(n.id) + 3); }
-  const p = S.pos3 && World.inMain(S.pos3.x, S.pos3.y) && !occ.has(S.pos3.x + ',' + S.pos3.y) ? [S.pos3.x, S.pos3.y] : World.nearestFree(A.quad[0], A.quad[1] + 2);
+  const p = S.pos3 && World.inMain(S.pos3.x, S.pos3.y) && !occ.has(S.pos3.x + ',' + S.pos3.y) ? [S.pos3.x, S.pos3.y] : World.nearestFree(A.quad[0] + (Math.random() * 7 | 0) - 3, A.quad[1] + 2 + (Math.random() * 3 | 0));
   teleport(...p);
+  me.energy = Math.min(maxE(), S.energy ?? 100);
   LANDMARKS = ['Great Hall', 'Fisher Library', 'Chau Chak Wing Museum', 'Anderson-Stuart Building', 'Charles Perkins Centre', 'Lake Northam', 'Victoria Park', 'The Front Lawn', 'Madsen Building']
     .map(n => { const p = World.find(n); return p && { n, x: p[0], y: p[1] }; }).filter(Boolean)
 
@@ -439,7 +454,9 @@ World.load('map.json').then(() => {
   renderAbil(); setZoom(0); renderQuestsIfShown();
 }).catch(err => { $('#loading').textContent = 'Could not load the campus map: ' + err.message; });
 function renderQuestsIfShown() { try { renderQuests(); } catch (e) {} }
-if (S.joined) { room = S.room || new URLSearchParams(location.search).get('room') || 'bcom-2027'; connect(); }
+const urlRoom = (new URLSearchParams(location.search).get('room') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40);
+if (urlRoom) S.room = urlRoom;
+if (S.joined) { room = S.room || 'bcom-2027'; connect(); }
 requestAnimationFrame(loop);
 
 return {

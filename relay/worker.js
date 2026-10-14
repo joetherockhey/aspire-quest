@@ -3,7 +3,7 @@
 const MAX_PLAYERS = 200;
 const clean = m => {
   const p = {};
-  if (typeof m.name === 'string') p.name = m.name.trim().slice(0, 24) || 'Student';
+  if (typeof m.name === 'string') p.name = m.name.replace(/[<>&"'`]/g, '').trim().slice(0, 24) || 'Student';
   if (/^#[0-9a-f]{6}$/i.test(m.color)) p.color = m.color;
   for (const k of ['x', 'y', 'xp', 'rank']) if (Number.isFinite(m[k])) p[k] = Math.max(0, Math.min(99999, m[k] | 0));
   if (typeof m.d === 'string') p.d = m.d.slice(0, 1);

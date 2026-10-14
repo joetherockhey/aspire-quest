@@ -232,6 +232,22 @@ form.ev .radios input{width:auto;flex:none;margin:0;accent-color:var(--accent)}
 .radios label:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
 .radios .rname{font-weight:600}
 .radios .rlvl{margin-left:auto;white-space:nowrap}
+.battle:not([hidden])~.pad,.battle:not([hidden])~.padA,.joinBox:not([hidden])~.pad,.joinBox:not([hidden])~.padA{display:none!important}
+.bt-sprite{animation:none!important}.bt-sprite.enter{animation:pop .4s steps(4)!important}
+.bt-foe,.bt-me{min-width:0}.bt-card{min-width:0!important;flex:1;max-width:280px}
+.bt-plat{width:clamp(90px,24vw,210px)!important;flex:none}
+#energy{font-weight:600}
+@media (max-width:640px){
+  #toasts{top:12px;bottom:auto;left:12px;right:12px}
+  #hint{left:10px;transform:none;max-width:calc(100% - 200px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.8rem}
+  .battle{padding:8px;gap:4px}.bt-moves{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+  .stage #hint{left:10px;transform:none;max-width:calc(100% - 190px)}
+  #toasts .toast:nth-last-child(n+3){display:none}
+  .toast{font-size:.8rem;padding:6px 10px}
+}
+#toasts{pointer-events:none}
 /* campus */
 .stage canvas#map{image-rendering:pixelated}
 .zoombar{position:absolute;top:10px;right:10px;display:flex;gap:4px;align-items:center;background:rgba(20,16,40,.7);padding:4px;border-radius:10px;color:#fff;font:600 .85rem "Pixelify Sans",monospace}
@@ -259,7 +275,7 @@ canvas.bt-sprite.me{width:clamp(64px,10vw,96px);background:none;border-radius:0}
 .hud{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin:0 0 10px}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--muted);margin-right:6px}
 .dot.on{background:var(--good);box-shadow:0 0 8px var(--good)}
-.stage{position:relative;height:min(68vh,620px);min-height:360px;border-radius:10px;overflow:hidden;border:3px solid #2b2b2b;background:#2f7d3a;outline:none;touch-action:none;user-select:none}
+.stage{position:relative;height:min(60vh,600px);min-height:360px;border-radius:10px;overflow:hidden;border:3px solid #2b2b2b;background:#2f7d3a;outline:none;touch-action:none;user-select:none}
 .stage:focus-visible{box-shadow:0 0 0 3px var(--accent)}
 .stage canvas{width:100%;height:100%;display:block}
 .tbox{position:absolute;left:12px;right:12px;bottom:12px;background:#fffdf5;color:#1b1830;border:4px solid #1b1830;border-radius:12px;padding:12px 14px;box-shadow:0 4px 0 rgba(0,0,0,.35);font-size:1rem;max-height:60%;overflow:auto}
@@ -322,7 +338,7 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
       <div class="rankgem" id="rankGem">1</div>
       <div class="pinfo">
         <div class="row">
-          <input class="pname" id="pname" aria-label="Your name" maxlength="28">
+          <input class="pname" id="pname" aria-label="Your name" maxlength="24">
           <span class="small muted" id="rankName"></span>
         </div>
         <div class="bar" role="progressbar" aria-label="Progress to next rank"><i id="xpBar"></i></div>
@@ -351,8 +367,8 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
 <main class="wrap">
   <section id="campus">
     <div class="hud">
-      <span id="netStatus" class="small"></span>
-      <span class="small muted hide-sm">Move: arrows/WASD · Run: Shift · Talk: Space · Chat: T · Map: M · Zoom: +/−</span>
+      <span id="netStatus" class="small"></span><span id="energy" class="small" title="Energy for challenges. The Wellbeing Coach at Charles Perkins Centre restores it."></span>
+      <span class="small muted hide-sm">Move: arrows/WASD · Run: Shift · Talk: Space · Chat: T · Map: M · Zoom: +/− or Ctrl+scroll</span>
       <button class="btn sm" id="profileBtn">Name &amp; room</button>
     </div>
     <div class="ablabel">Abilities</div><div class="abilbar" id="abilbar" aria-label="Your abilities"></div>
@@ -687,7 +703,7 @@ const count = n => CAPS.filter(c=>lvl(c.id)>=n).length;
 const dom = (d,n) => CAPS.filter(c=>c.d===d).every(c=>lvl(c.id)>=n);
 const unlocked = c => !c.req || Object.entries(c.req).every(([k,v])=>lvl(k)>=v);
 function rank(){ let r=0; for(let i=1;i<RANKS.length;i++){ if(S.xp>=RANKS[i].xp && RANKS[i].ok()) r=i; else break; } return r; }
-const today = ()=>new Date().toISOString().slice(0,10);
+const today = (ago=0)=>{ const d=new Date(Date.now()-ago*864e5); return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); }; // local date, not UTC
 const esc = s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 const words = s=>(s.trim().match(/\S+/g)||[]).length;
 const cv = d=>`var(${DOMAINS[d].c})`;
@@ -703,10 +719,12 @@ function commit(fn){
   window.Campus && Campus.sync();
 }
 // in-person quests can only be checked in at their location on the campus map
+const doneToday = q => q.rep && (S.qd||{})[q.id]===today();
 const questBtn = (q,extra='') => !q.rep&&S.q[q.id] ? `<button class="btn sm" disabled>Completed</button>`
+  : doneToday(q) ? `<button class="btn sm" disabled title="Repeatable quests can be checked in once a day">Done today</button>`
   : q.m==='In person' ? `<button class="btn sm" data-goto="${q.id}">📍 Find on map</button>`
   : `<button class="btn sm primary" data-quest="${q.id}" ${extra}>Check in</button>`;
-function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $('#toasts').append(t); while($('#toasts').children.length>3) $('#toasts').firstChild.remove(); setTimeout(()=>t.remove(),4200); }
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $('#toasts').append(t); while($('#toasts').children.length>5) $('#toasts').firstChild.remove(); setTimeout(()=>t.remove(),5200); }
 const $ = s=>document.querySelector(s);
 
 /* ---------- render ---------- */
@@ -718,7 +736,7 @@ function render(){
   $('#xpText').textContent=`${S.xp} XP`;
   if(nx){
     const lo=RANKS[r].xp, pct=Math.min(100,(S.xp-lo)/(nx.xp-lo)*100);
-    $('#xpBar').style.width=pct+'%'; $('#xpNext').textContent=`Next: ${nx.n}`;
+    $('#xpBar').style.width=pct+'%'; $('#xpNext').textContent=S.xp>=nx.xp&&!nx.ok()?`Next: ${nx.n} · needs breadth`:`Next: ${nx.n}`; $('#xpNext').title=`${nx.n}: ${nx.xp} XP and ${nx.rule.toLowerCase()}`;
     $('#goal').innerHTML=`<b>Next rank · ${nx.n}</b><span class="chk ${S.xp>=nx.xp?'ok':''}">${S.xp} / ${nx.xp} XP</span><span class="chk ${nx.ok()?'ok':''}">${nx.rule}</span>`;
   } else {
     $('#xpBar').style.width='100%'; $('#xpNext').textContent='Max rank';
@@ -735,7 +753,7 @@ function nodeHTML(c){
   const ab=ABIL.filter(a=>a.cap===c.id).map(a=>`<span class="ab ${lvl(c.id)>=a.l&&!lock?'on':''}" title="${a.n} (Level ${a.l}): ${a.d}">${a.i}</span>`).join('');
   return `<button class="node ${l?'on':''} ${lock?'locked':''}" data-cap="${c.id}" style="--dc:${cv(c.d)}">
     <span class="orb"></span><span class="nbody"><div class="nm">${c.n}</div><div class="lv">${sub}</div>
-    <div class="pips">${pips}</div><div class="abs">${ab}</div>${p?'<div class="pend">⏳ awaiting endorsement</div>':''}</span></button>`;
+    <div class="pips">${pips}</div><div class="abs">${ab}</div>${p?`<div class="pend">⏳ awaiting ${p.level>=4?'verification':'endorsement'}</div>`:''}</span></button>`;
 }
 function renderTree(){
   $('#treeGrid').innerHTML = CORE.map(d=>{
@@ -754,7 +772,7 @@ function renderQuests(){
   const streams=['All',...new Set(QUESTS.map(q=>q.s))];
   $('#qFilters').innerHTML=streams.map(s=>`<button data-qf="${s}" aria-pressed="${s===qFilter}">${s}</button>`).join('');
   $('#questGrid').innerHTML=QUESTS.filter(q=>qFilter==='All'||q.s===qFilter).map(q=>{
-    const done=S.q[q.id]||0, at=window.Campus?Campus.where(q.id):'';
+    const done=S.q[q.id]||0, at=window.Campus&&q.m!=='Online'?Campus.where(q.id):'';
     return `<div class="card"><div class="meta"><span class="chip">${q.s}</span><span class="chip">${q.m}</span>${q.rep?'<span class="chip">Repeatable</span>':''}</div>
       <h3>${q.n}</h3>${at?`<span class="small muted">📍 ${at}</span>`:''}${done?`<span class="small muted">Completed ${done}×</span>`:''}<div class="meta">${q.t.map(t=>`<span class="chip c" style="--cc:${cv(CAP[t].d)}">${CAP[t].n}</span>`).join('')}</div>
       <div class="foot"><span class="xp">+${q.xp} XP</span>${questBtn(q)}</div></div>`;
@@ -766,16 +784,16 @@ function renderBadges(){
 }
 function renderSquad(){
   $('#optIn').checked=S.optIn;
-  const real=Object.entries(S.friends||{}).map(([n,f])=>({n,x:f.xp,on:window.Campus&&Campus.online(n)}));
-  const pals=real.length?real:SQUAD.map(([n,x])=>({n:n+' (sample)',x}));
-  const rows=[...pals,{n:S.optIn?S.name+' (you)':'You (hidden from squad)',x:S.xp,me:true}].sort((a,b)=>b.x-a.x);
-  $('#board').innerHTML=rows.map((r,i)=>`<div class="r ${r.me?'me':''}"><span class="pos">${i+1}</span><span><b>${esc(r.n)}</b>${r.on?' <span class="dot on" title="On campus now"></span>':''}<br><span class="small muted">${RANKS[rankFor(r.x)].n}</span></span><span class="xp">${r.x} XP</span></div>`).join('')
+  const real=Object.entries(S.friends||{}).map(([n,f])=>({n,x:f.xp,rk:f.rank||0,on:window.Campus&&Campus.online(n)}));
+  const pals=real.length?real:SQUAD.map(([n,x])=>({n:n+' (sample)',x,rk:rankFor(x)}));
+  const rows=[...pals,{n:S.optIn?S.name+' (you)':'You (hidden from squad)',x:S.xp,rk:rank(),me:true}].sort((a,b)=>b.x-a.x);
+  $('#board').innerHTML=rows.map((r,i)=>`<div class="r ${r.me?'me':''}"><span class="pos">${i+1}</span><span><b>${esc(r.n)}</b>${r.on?' <span class="dot on" title="On campus now"></span>':''}<br><span class="small muted">${(RANKS[r.rk]||RANKS[0]).n}</span></span><span class="xp">${r.x} XP</span></div>`).join('')
     +(real.length?'':'<div class="r"><span></span><span class="small muted">Walk up to a classmate on the Campus map and press Space to squad up. Until then, these are sample squadmates.</span><span></span></div>');
-  const tot=COHORT.base+S.xp+pals.reduce((a,p)=>a+p.x,0);
+  const tot=COHORT.base+S.xp+SQUAD.reduce((a,[,x])=>a+x,0)+real.reduce((a,p)=>a+p.x,0);
   $('#cohortTxt').textContent=`${tot.toLocaleString()} / ${COHORT.goal.toLocaleString()}`;
   $('#cohortBar').style.width=Math.min(100,tot/COHORT.goal*100)+'%';
 }
-const rankFor = x=>{ let r=0; RANKS.forEach((k,i)=>{ if(x>=k.xp) r=i; }); return r; }; // friends: XP-only estimate
+const rankFor = x=>{ let r=0; RANKS.forEach((k,i)=>{ if(x>=k.xp) r=i; }); return r; }; // sample squadmates only: real players send their actual rank
 function renderPortfolio(){
   $('#profile').innerHTML=CAPS.filter(c=>c.d!=='lead'||unlocked(c)).map(c=>{ const l=lvl(c.id);
     return `<div class="pr" style="--cc:${cv(c.d)}"><span>${c.n}</span><span class="muted">L${l}${l?' '+LEVELS[l].n:''}</span><div class="bar"><i style="width:${l*20}%"></i></div></div>`;}).join('');
@@ -841,6 +859,7 @@ function show(html){ $('#dlgBody').innerHTML=html; if(!dlg.open) dlg.showModal()
 /* ---------- actions ---------- */
 function doQuest(qid,cap){
   const q=QUESTS.find(x=>x.id===qid);
+  S.qd=S.qd||{}; S.qd[qid]=today();
   S.xp+=q.xp; S.q[qid]=(S.q[qid]||0)+1; S.log.push({date:today(),q:qid,cap,xp:q.xp});
   if(lvl(cap)===0&&!pending(cap)) ents(cap).push({level:1,st:'v',date:today(),text:'Took part: '+q.n});
 }
@@ -861,7 +880,8 @@ document.addEventListener('click',e=>{
 document.addEventListener('submit',e=>{
   const f=e.target; if(!f.matches('form.ev')) return; e.preventDefault();
   if(f.dataset.questform){
-    const cap=f.querySelector('input[name=cap]:checked').value, qid=f.dataset.questform;
+    const cap=f.querySelector('input[name=cap]:checked').value, qid=f.dataset.questform, qq=QUESTS.find(x=>x.id===qid);
+    if((!qq.rep&&S.q[qid])||doneToday(qq)){ dlg.close(); return toast('Already checked in to that one today.'); }
     const near=window.Campus?Campus.nearby():[];
     const sb=can('teamspirit')?35:25;
     commit(()=>{ doQuest(qid,cap); if(can('persuade')) S.xp+=5; if(near.length){ S.squad++; S.xp+=sb; } });
@@ -880,6 +900,7 @@ document.addEventListener('submit',e=>{
 dlg.addEventListener('click',e=>{ if(e.target===dlg) dlg.close(); });
 
 function selectTab(id){
+  if(id==='squad') renderSquad();
   document.querySelectorAll('nav.tabs [data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));
   document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!==id);
   try{ localStorage.setItem(KEY+'-tab',id); }catch(e){}
@@ -887,11 +908,11 @@ function selectTab(id){
 }
 $('#pname').addEventListener('change',e=>{ S.name=e.target.value.trim()||'Player'; save(); render(); });
 $('#optIn').addEventListener('change',e=>{ S.optIn=e.target.checked; save(); renderSquad(); });
-$('#squadQuest').addEventListener('click',()=>commit(()=>{ S.squad++; S.xp+=25; S.log.push({date:today(),q:'squad',xp:25}); }));
+$('#squadQuest').addEventListener('click',()=>{ if(S.sqd===today()) return toast('Squad quest already done today. Come back tomorrow.'); commit(()=>{ S.sqd=today(); S.squad++; S.xp+=25; S.log.push({date:today(),q:'squad',xp:25}); }); });
 $('#resetBtn').addEventListener('click',()=>{ if(confirm('Reset all progress in this browser?')){ S=Object.assign(fresh(),keepId()); save(); render(); toast('Progress reset'); }});
 $('#sampleBtn').addEventListener('click',()=>{
   // Sam: first-year, works part-time, mid-way through S1
-  S=Object.assign(fresh(),keepId()); S.name='Sam (demo)';
+  S=Object.assign(fresh(),keepId());
   const plan={welcome:'collab',study:'life',mentee:'drive',openday:'comm',job:'life',industry:'crit',casecomp:'psd',ai:'dig',care:'emp',hack:'crea',club:'innov'};
   Object.entries(plan).forEach(([q,c])=>doQuest(q,c));
   doQuest('industry','cult'); doQuest('leadws','eth');
@@ -905,11 +926,12 @@ $('#sampleBtn').addEventListener('click',()=>{
     emp:'Situation: a regular at my café shift was upset about a wrong order. Task: fix it without the queue building up. Action: I listened, apologised and remade it while my colleague took orders. Result: they thanked me and came back the next week. HCS skill: Sensitive.',
     dig:'Situation: in the responsible AI workshop we used AI to draft a market summary. Task: check whether it was accurate. Action: I verified each figure against the ABS source and flagged two errors. Result: our group submitted a corrected version with sources. HCS skill: Information handling.',
     drive:'Situation: I was juggling 20 hours of work with four units. Task: stop falling behind. Action: I blocked out study time each Sunday, set weekly targets and booked a mentoring catch-up. Result: I submitted every assessment on time. HCS skill: Prioritising.'};
-  Object.entries(R).forEach(([c,txt],i)=>{ ents(c).push({level:2,st:'v',date:'2027-0'+(3+(i%2))+'-'+String(10+i*2).padStart(2,'0'),text:txt}); S.xp+=20; });
-  ents('psd').push({level:3,st:'v',date:'2027-04-20',text:'Case competition financial model and data appendix',by:'Maria Chen (Mentor)'}); S.xp+=40;
-  ents('comm').push({level:3,st:'v',date:'2027-04-22',text:'Open Day talk to 40 prospective students and their parents',by:'Priya N. (Peer)'}); S.xp+=40;
-  ents('comm').push({level:4,st:'p',date:'2027-05-01',text:'Weekly client updates during part-time role at a café group',by:'J. Lee (Employer)'});
-  save(); render(); toast('Loaded demo student: Sam'); selectTab('tree');
+  Object.entries(R).forEach(([c,txt],i)=>{ ents(c).push({level:2,st:'v',date:today(40-i*3),text:txt}); S.xp+=20; });
+  ents('psd').push({level:3,st:'v',date:today(10),text:'Case competition financial model and data appendix',by:'Maria Chen (Mentor)'}); S.xp+=40;
+  ents('comm').push({level:3,st:'v',date:today(8),text:'Open Day talk to 40 prospective students and their parents',by:'Priya N. (Peer)'}); S.xp+=40;
+  ents('comm').push({level:4,st:'p',date:today(2),text:'Weekly client updates during part-time role at a café group',by:'J. Lee (Employer)'});
+  S.qd={}; // demo history shouldn't block today's check-ins
+  save(); render(); toast('Loaded demo progress: a first-year mid-way through semester'); selectTab('tree');
 });
 
 addEventListener('DOMContentLoaded',()=>{ // after campus.js has loaded
@@ -922,7 +944,7 @@ document.getElementById('lvlTable').innerHTML='<tr><th>Game level</th><th>HCS le
 document.getElementById('abilTable').innerHTML='<tr><th>Ability</th><th>Unlocked by</th><th>What it does</th></tr>'+ABIL.map(a=>`<tr><td>${a.i} <b>${a.n}</b></td><td>${CAP[a.cap].n} · Level ${a.l}</td><td class="small">${a.d}</td></tr>`).join('');
 document.getElementById('rankTable').innerHTML='<tr><th>Rank</th><th>XP</th><th>Breadth requirement</th></tr>'+RANKS.map((r,i)=>`<tr><td><b style="color:${r.c}">${i+1} · ${r.n}</b></td><td>${r.xp}</td><td>${r.rule||'Start here'}</td></tr>`).join('');
 </script>
-<script src="world.js?v=6"></script>
-<script src="campus.js?v=6"></script>
+<script src="world.js?v=8"></script>
+<script src="campus.js?v=8"></script>
 </body>
 </html>
