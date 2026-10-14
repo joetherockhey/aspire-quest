@@ -67,7 +67,7 @@ nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
 nav.tabs button{border:0;background:none;padding:12px 12px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 main{padding:22px 0 40px}
-section[hidden]{display:none}
+[hidden]{display:none!important}
 .lede{max-width:760px}
 
 /* buttons */
@@ -192,6 +192,51 @@ form.ev textarea{min-height:110px;resize:vertical}
 @keyframes pop{from{transform:translateY(12px);opacity:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
+/* campus */
+.hud{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin:0 0 10px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--muted);margin-right:6px}
+.dot.on{background:var(--good);box-shadow:0 0 8px var(--good)}
+.stage{position:relative;height:min(68vh,620px);min-height:360px;border-radius:18px;overflow:hidden;border:3px solid var(--ink);background:#2f7d3a;outline:none;touch-action:none;user-select:none}
+.stage:focus-visible{box-shadow:0 0 0 3px var(--accent)}
+.stage canvas{width:100%;height:100%;display:block}
+.tbox{position:absolute;left:12px;right:12px;bottom:12px;background:#fffdf5;color:#1b1830;border:4px solid #1b1830;border-radius:12px;padding:12px 14px;box-shadow:0 4px 0 rgba(0,0,0,.35);font-size:1rem;max-height:60%;overflow:auto}
+.tb-name{font:700 .85rem "Space Grotesk";text-transform:uppercase;letter-spacing:.04em;color:#5b3df5;margin-bottom:4px}
+.tb-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tbox .btn{background:#fff;color:#1b1830;border-color:#cfcae0}
+.tbox .btn.primary{background:#5b3df5;color:#fff;border-color:#5b3df5}
+.tbox .muted{color:#5f5b78}
+.battle{position:absolute;inset:0;background:linear-gradient(#cfe9ff 0 55%,#9bd27e 55%);color:#1b1830;display:grid;grid-template-rows:1fr 1fr auto;padding:14px;gap:8px}
+.bt-foe,.bt-me{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bt-me{flex-direction:row}
+.bt-sprite{font-size:clamp(3.5rem,11vw,6rem);filter:drop-shadow(0 6px 0 rgba(0,0,0,.2));animation:pop .4s ease-out}
+.bt-sprite.me{width:1.6em;height:1.6em;border-radius:50%;display:grid;place-items:center;background:var(--c);font-size:clamp(2rem,6vw,3rem)}
+.bt-card{background:#fffdf5;border:3px solid #1b1830;border-radius:10px;padding:8px 12px;min-width:min(260px,55vw);display:flex;flex-direction:column;gap:2px}
+.bt-card .bar{background:#e4e0f0}
+.bt-panel{background:#fffdf5;border:4px solid #1b1830;border-radius:12px;padding:10px 12px}
+.bt-msg{min-height:2.6em;margin-bottom:8px}
+.bt-moves{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.bt-moves .btn{background:#fff;color:#1b1830;border-color:#cfcae0;text-align:left}
+.bt-moves .btn.primary{background:#5b3df5;color:#fff}
+.bt-panel .muted{color:#5f5b78}
+.joinBox{position:absolute;inset:0;display:grid;place-items:center;background:rgba(15,13,28,.6);padding:16px}
+.joinBox form{background:var(--panel);border-radius:16px;padding:20px;width:min(420px,100%);display:flex;flex-direction:column;gap:10px}
+.joinBox label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:.9rem}
+.joinBox input{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:8px}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.swatches button{width:32px;height:32px;border-radius:50%;border:3px solid transparent}
+.swatches button[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--panel) inset}
+.pad{position:absolute;left:12px;bottom:12px;display:none;grid-template-areas:". u ." "l . r" ". d .";grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:2px;opacity:.85}
+.pad button,.padA{border:0;border-radius:12px;background:rgba(20,16,40,.7);color:#fff;font-size:1.1rem;touch-action:none}
+.padA{position:absolute;right:16px;bottom:40px;width:64px;height:64px;border-radius:50%;font:700 1.3rem "Space Grotesk";display:none}
+@media (pointer:coarse){.pad{display:grid}.padA{display:block}.hide-sm{display:none}}
+.tbox:not([hidden])~.pad,.tbox:not([hidden])~.padA{display:none}
+.chatbar{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:10px}
+#chatLog{flex:1 1 100%;display:flex;flex-direction:column;gap:2px;color:var(--muted)}
+#chatLog:empty{display:none}
+#chatForm{display:flex;gap:6px;flex:1 1 300px}
+#chatForm input{flex:1;min-width:0;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 10px}
+.emotes{display:flex;gap:4px;flex-wrap:wrap}
+
 footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);font-size:.82rem}
 @media print{
   .top,nav.tabs,footer,#toasts,.noprint{display:none!important}
@@ -232,7 +277,8 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
 
 <nav class="tabs" aria-label="Sections">
   <div class="wrap" role="tablist">
-    <button role="tab" data-tab="tree" aria-selected="true">Skill tree</button>
+    <button role="tab" data-tab="campus" aria-selected="true">🗺️ Campus</button>
+    <button role="tab" data-tab="tree">Skill tree</button>
     <button role="tab" data-tab="quests">Quests</button>
     <button role="tab" data-tab="badges">Badges</button>
     <button role="tab" data-tab="squad">Squad</button>
@@ -242,7 +288,32 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
 </nav>
 
 <main class="wrap">
-  <section id="tree">
+  <section id="campus">
+    <div class="hud">
+      <span id="netStatus" class="small"></span>
+      <span class="small muted hide-sm">Move: arrows/WASD · Talk: Space · Chat: T</span>
+      <button class="btn sm" id="profileBtn">Name &amp; room</button>
+    </div>
+    <div class="stage" id="stage" tabindex="0" aria-label="Campus map. Use arrow keys to move and Space to talk.">
+      <canvas id="map"></canvas>
+      <div class="tbox" id="tbox" hidden></div>
+      <div class="battle" id="battle" hidden></div>
+      <div class="joinBox" id="joinBox" hidden></div>
+      <div class="pad" aria-hidden="true">
+        <button data-pad="u" style="grid-area:u">▲</button><button data-pad="l" style="grid-area:l">◀</button>
+        <button data-pad="r" style="grid-area:r">▶</button><button data-pad="d" style="grid-area:d">▼</button>
+      </div>
+      <button class="padA" data-pad="a" aria-label="Talk / interact">A</button>
+    </div>
+    <div class="chatbar">
+      <div id="chatLog" class="small"></div>
+      <form id="chatForm"><input id="chatIn" maxlength="120" placeholder="Say something to people on campus…" autocomplete="off" aria-label="Chat message"><button class="btn sm primary">Send</button></form>
+      <div class="emotes"><button class="btn sm" data-emote="👋">👋</button><button class="btn sm" data-emote="🎉">🎉</button><button class="btn sm" data-emote="📚">📚</button><button class="btn sm" data-emote="☕">☕</button><button class="btn sm" data-emote="🤝">🤝</button></div>
+    </div>
+    <p class="small muted" style="margin-top:10px">Walk around campus and talk to anyone with a <b>!</b> to check in to ASPIRE quests. In-person quests can only be done at their location. Tall grass in Victoria Park and near the Charles Perkins Centre hides <b>challenges</b>: beat them using your capabilities as moves. Walk up to a classmate and press Space to wave or squad up. Check in to a quest with a squadmate nearby for a +25 XP bonus. The map is stylised and not to scale.</p>
+  </section>
+
+  <section id="tree" hidden>
     <div class="goal" id="goal"></div>
     <div class="tree" id="treeGrid"></div>
     <div class="branch lead" id="leadBranch"></div>
@@ -367,12 +438,23 @@ footer{border-top:1px solid var(--line);padding:18px 0 30px;color:var(--muted);f
             <li>LEAD prestige branch unlocked</li>
             <li>Verified levels issued as Open Badges / verifiable credentials, shareable to LinkedIn</li>
             <li>Employer-set quests and employers verifying Level 4 directly</li>
-            <li>Mobile app with squads, notifications and event check-in</li>
+            <li>Campus world with live presence at real events (this prototype shows the idea) and moderation tools</li>
             <li>Analytics that link participation to SES and graduate outcomes</li>
           </ul></div>
       </div>
 
-      <h2>7 · Questions for the strategy session</h2>
+      <h2>7 · The campus world</h2>
+      <p>Everyone in a cohort shares one walkable (stylised) Camperdown and Darlington campus. It turns the recognition model into a place:</p>
+      <div class="tscroll"><table>
+        <tr><th>Game element</th><th>Recognition model link</th></tr>
+        <tr><td>People with a <b>!</b> at real buildings (Quad, Fisher, Manning, Abercrombie, JFR, Wentworth, Holme)</td><td>Quest check-ins = <b>participation XP</b>. In-person quests only work at their location, just like scanning a QR code at the event.</td></tr>
+        <tr><td>Challenges in tall grass (Deadline Dragon, Group Project Ghost, Imposter Syndrome…)</td><td>Your capabilities are your <b>moves</b>, and higher levels hit harder. Each challenge is weak to one branch. XP is capped at 75 a day, and a win never levels a skill by itself. It prompts a reflection instead.</td></tr>
+        <tr><td>Wellbeing Coach at Charles Perkins Centre</td><td>Restores energy. It's a gentle nudge toward support services.</td></tr>
+        <tr><td>Other students walking around, chat and emotes</td><td><b>Belonging</b> and connecting outside class (SES). Squad up in person, then check in together for a +25 XP bonus.</td></tr>
+        <tr><td>Cohort room codes</td><td>Each cohort or class gets its own world. Only name, avatar colour, XP, rank and strongest capability are shared. Evidence stays on the student's device.</td></tr>
+      </table></div>
+
+      <h2>8 · Questions for the strategy session</h2>
       <ol>
         <li>Where are we now? What gets recognised in ASPIRE today, and what goes unseen?</li>
         <li>Which incentive would actually change what you do: XP, badges, squads, or portfolio credentials?</li>
@@ -476,6 +558,7 @@ const KEY='aspire-quest-v1';
 const fresh = ()=>({name:'Your name', xp:0, caps:{}, q:{}, log:[], squad:0, optIn:true});
 let S = fresh();
 try{ const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(fresh(),JSON.parse(raw)); }catch(e){}
+const keepId=()=>({joined:S.joined,color:S.color,room:S.room,friends:S.friends,pos:S.pos,name:S.name});
 const save=()=>{ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} };
 
 const ents = id => S.caps[id]||(S.caps[id]=[]);
@@ -497,7 +580,12 @@ function commit(fn){
   CAPS.forEach(c=>{ if(b.l[c.id]>a.l[c.id]) toast(`⬆️ ${c.n} reached Level ${b.l[c.id]}: ${LEVELS[b.l[c.id]].n}`); });
   b.b.filter(x=>!a.b.includes(x)).forEach(id=>{ const bd=BADGES.find(x=>x.id===id); toast(`${bd.i} Badge unlocked: ${bd.n}`); });
   if(b.r>a.r) toast(`🎉 Rank up! You're now ${RANKS[b.r].n}`);
+  window.Campus && Campus.sync();
 }
+// in-person quests can only be checked in at their location on the campus map
+const questBtn = (q,extra='') => !q.rep&&S.q[q.id] ? `<button class="btn sm" disabled>Completed</button>`
+  : q.m==='In person' ? `<button class="btn sm" data-goto="${q.id}">📍 Find on map</button>`
+  : `<button class="btn sm primary" data-quest="${q.id}" ${extra}>Check in</button>`;
 function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $('#toasts').append(t); while($('#toasts').children.length>3) $('#toasts').firstChild.remove(); setTimeout(()=>t.remove(),4200); }
 const $ = s=>document.querySelector(s);
 
@@ -544,10 +632,10 @@ function renderQuests(){
   const streams=['All',...new Set(QUESTS.map(q=>q.s))];
   $('#qFilters').innerHTML=streams.map(s=>`<button data-qf="${s}" aria-pressed="${s===qFilter}">${s}</button>`).join('');
   $('#questGrid').innerHTML=QUESTS.filter(q=>qFilter==='All'||q.s===qFilter).map(q=>{
-    const done=S.q[q.id]||0, off=!q.rep&&done;
+    const done=S.q[q.id]||0, at=window.Campus?Campus.where(q.id):'';
     return `<div class="card"><div class="meta"><span class="chip">${q.s}</span><span class="chip">${q.m}</span>${q.rep?'<span class="chip">Repeatable</span>':''}</div>
-      <h3>${q.n}</h3><div class="meta">${q.t.map(t=>`<span class="chip c" style="--cc:${cv(CAP[t].d)}">${CAP[t].n}</span>`).join('')}</div>
-      <div class="foot"><span class="xp">+${q.xp} XP</span><span>${done?`<span class="small muted">done ×${done}</span> `:''}<button class="btn sm primary" data-quest="${q.id}" ${off?'disabled':''}>${off?'Completed':'Check in'}</button></span></div></div>`;
+      <h3>${q.n}</h3>${at?`<span class="small muted">📍 ${at}</span>`:''}<div class="meta">${q.t.map(t=>`<span class="chip c" style="--cc:${cv(CAP[t].d)}">${CAP[t].n}</span>`).join('')}</div>
+      <div class="foot"><span class="xp">+${q.xp} XP</span><span>${done?`<span class="small muted">done ×${done}</span> `:''}${questBtn(q)}</span></div></div>`;
   }).join('');
 }
 function renderBadges(){
@@ -556,9 +644,12 @@ function renderBadges(){
 }
 function renderSquad(){
   $('#optIn').checked=S.optIn;
-  const rows=[...SQUAD.map(([n,x])=>({n,x})),{n:S.optIn?S.name+' (you)':'You (hidden from squad)',x:S.xp,me:true}].sort((a,b)=>b.x-a.x);
-  $('#board').innerHTML=rows.map((r,i)=>`<div class="r ${r.me?'me':''}"><span class="pos">${i+1}</span><span><b>${esc(r.n)}</b><br><span class="small muted">${RANKS[rankFor(r.x)].n}</span></span><span class="xp">${r.x} XP</span></div>`).join('');
-  const tot=COHORT.base+S.xp+SQUAD.reduce((a,[,x])=>a+x,0);
+  const real=Object.entries(S.friends||{}).map(([n,f])=>({n,x:f.xp,on:window.Campus&&Campus.online(n)}));
+  const pals=real.length?real:SQUAD.map(([n,x])=>({n:n+' (sample)',x}));
+  const rows=[...pals,{n:S.optIn?S.name+' (you)':'You (hidden from squad)',x:S.xp,me:true}].sort((a,b)=>b.x-a.x);
+  $('#board').innerHTML=rows.map((r,i)=>`<div class="r ${r.me?'me':''}"><span class="pos">${i+1}</span><span><b>${esc(r.n)}</b>${r.on?' <span class="dot on" title="On campus now"></span>':''}<br><span class="small muted">${RANKS[rankFor(r.x)].n}</span></span><span class="xp">${r.x} XP</span></div>`).join('')
+    +(real.length?'':'<div class="r"><span></span><span class="small muted">Walk up to a classmate on the Campus map and press Space to squad up. Until then, these are sample squadmates.</span><span></span></div>');
+  const tot=COHORT.base+S.xp+pals.reduce((a,p)=>a+p.x,0);
   $('#cohortTxt').textContent=`${tot.toLocaleString()} / ${COHORT.goal.toLocaleString()}`;
   $('#cohortBar').style.width=Math.min(100,tot/COHORT.goal*100)+'%';
 }
@@ -584,7 +675,7 @@ function openCap(id){
       <div style="margin-top:8px"><button class="btn sm primary" data-approve="${id}">Simulate approval</button> <span class="small muted">(in the real system the endorser gets a link)</span></div></div>`;
   } else if(next===1){
     const qs=QUESTS.filter(q=>q.t.includes(id));
-    action=`<h3>Spark it: do one of these quests</h3>`+(qs.length?`<div class="radios">${qs.map(q=>`<button class="btn sm" data-quest="${q.id}" data-pre="${id}" ${!q.rep&&S.q[q.id]?'disabled':''}>${q.n} · +${q.xp} XP</button>`).join('')}</div>`
+    action=`<h3>Spark it: do one of these quests</h3>`+(qs.length?`<div class="radios">${qs.map(q=>`<div class="foot" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="small">${q.n} · +${q.xp} XP</span>${questBtn(q,`data-pre="${id}"`)}</div>`).join('')}</div>`
       :`<p class="small muted">No quest tags this yet, so record a real experience instead.</p><button class="btn sm primary" data-spark="${id}">Log a real-world experience</button>`);
   } else if(next<=5){
     const f={
@@ -628,8 +719,9 @@ function doQuest(qid,cap){
 function approve(id){ const p=pending(id); if(!p) return; p.st='v'; S.xp+=LEVELS[p.level].bonus; }
 
 document.addEventListener('click',e=>{
-  const el=e.target.closest('[data-cap],[data-quest],[data-approve],[data-close],[data-qf],[data-tab],[data-spark]');
+  const el=e.target.closest('[data-cap],[data-quest],[data-approve],[data-close],[data-qf],[data-tab],[data-spark],[data-goto]');
   if(!el) return;
+  if(el.dataset.goto){ if(dlg.open) dlg.close(); Campus.goto(el.dataset.goto); return; }
   if(el.dataset.tab){ selectTab(el.dataset.tab); return; }
   if(el.dataset.qf){ qFilter=el.dataset.qf; renderQuests(); return; }
   if('close' in el.dataset){ dlg.close(); return; }
@@ -639,10 +731,13 @@ document.addEventListener('click',e=>{
   if(el.matches('.node')) openCap(el.dataset.cap);
 });
 document.addEventListener('submit',e=>{
-  const f=e.target; e.preventDefault();
+  const f=e.target; if(!f.matches('form.ev')) return; e.preventDefault();
   if(f.dataset.questform){
     const cap=f.querySelector('input[name=cap]:checked').value, qid=f.dataset.questform;
-    commit(()=>doQuest(qid,cap)); dlg.close(); return;
+    const near=window.Campus?Campus.nearby():[];
+    commit(()=>{ doQuest(qid,cap); if(near.length){ S.squad++; S.xp+=25; } });
+    if(near.length) toast(`👥 Went together with ${near.slice(0,3).join(', ')}: +25 XP squad bonus`);
+    dlg.close(); return;
   }
   const n=+f.dataset.level, id=f.dataset.cap, text=f.querySelector('#t').value.trim();
   if(n===2&&words(text)<50){ toast(`Reflection needs 50+ words (you have ${words(text)})`); return; }
@@ -659,14 +754,15 @@ function selectTab(id){
   document.querySelectorAll('nav.tabs [data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));
   document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!==id);
   try{ localStorage.setItem(KEY+'-tab',id); }catch(e){}
+  if(id==='campus'&&window.Campus) Campus.shown();
 }
 $('#pname').addEventListener('change',e=>{ S.name=e.target.value.trim()||'Player'; save(); render(); });
 $('#optIn').addEventListener('change',e=>{ S.optIn=e.target.checked; save(); renderSquad(); });
 $('#squadQuest').addEventListener('click',()=>commit(()=>{ S.squad++; S.xp+=25; S.log.push({date:today(),q:'squad',xp:25}); }));
-$('#resetBtn').addEventListener('click',()=>{ if(confirm('Reset all progress in this browser?')){ S=fresh(); save(); render(); toast('Progress reset'); }});
+$('#resetBtn').addEventListener('click',()=>{ if(confirm('Reset all progress in this browser?')){ S=Object.assign(fresh(),keepId()); save(); render(); toast('Progress reset'); }});
 $('#sampleBtn').addEventListener('click',()=>{
   // Sam: first-year, works part-time, mid-way through S1
-  S=fresh(); S.name='Sam (demo)';
+  S=Object.assign(fresh(),keepId()); S.name='Sam (demo)';
   const plan={welcome:'collab',study:'life',mentee:'self',openday:'comm',job:'adapt',industry:'crit',casecomp:'psd',ai:'dig',care:'emp',hack:'crea',club:'innov'};
   Object.entries(plan).forEach(([q,c])=>doQuest(q,c));
   doQuest('industry','cult'); doQuest('leadws','eth');
@@ -678,10 +774,13 @@ $('#sampleBtn').addEventListener('click',()=>{
   save(); render(); toast('Loaded demo student: Sam'); selectTab('tree');
 });
 
-render();
-let startTab='tree'; try{ startTab=localStorage.getItem(KEY+'-tab')||'tree'; }catch(e){}
-selectTab(startTab);
+addEventListener('DOMContentLoaded',()=>{ // after campus.js has loaded
+  render();
+  let startTab='campus'; try{ startTab=localStorage.getItem(KEY+'-tab')||'campus'; }catch(e){}
+  selectTab(startTab);
+});
 document.getElementById('rankTable').innerHTML='<tr><th>Rank</th><th>XP</th><th>Breadth requirement</th></tr>'+RANKS.map((r,i)=>`<tr><td><b style="color:${r.c}">${i+1} · ${r.n}</b></td><td>${r.xp}</td><td>${r.rule||'Start here'}</td></tr>`).join('');
 </script>
+<script src="campus.js"></script>
 </body>
 </html>
